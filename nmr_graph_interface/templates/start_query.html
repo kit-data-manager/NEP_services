@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/keycloak-js@18.0.1/dist/keycloak.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script type="module" src="{{ url_for('static', filename='js/index.settings.js') }}"></script>
+    <title>SPARQL Query Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            width: 100px; /* Adjust based on the size of your logo */
+            height: auto;
+        }
+        .header .header-text {
+            margin-left: 20px;
+            font-size: 24px;
+        }
+        .search-fields {
+            margin-bottom: 20px;
+        }
+        .search-field {
+            margin-right: 10px;
+        }
+        .documentation {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="/static/NEP.png" alt="Logo">
+        <div class="header-text">SPARQL Query Interface</div>
+    </div>
+    <h2>Submit Your Query</h2>
+
+    <form action="/execute_query" method="post">
+        <div class="search-fields">
+            <input type="text" name="record_attribute" class="search-field" placeholder="Record Attribute">
+            <input type="text" name="attribute_value" class="search-field" placeholder="Attribute Value">
+            <button type="submit">Execute Query</button>
+        </div>
+    </form>
+
+    <div class="documentation">
+        <h3>Documentation</h3>
+        <p>To be done:</p>
+        <ul>
+            <li><b>Record Attribute: to be done</b> </li>
+            <li><b>Attribute Value: to be done</b> </li>
+        </ul>
+    </div>
+    
+    <button id="login_button">Login</button>
+    <span id="logged_in_as">Not logged in.</span>
+    
+    <script type="module">
+        import { keycloak } from '/static/js/index.settings.js';
+        
+        // Initialize Keycloak and define behavior
+        keycloak.init({ onLoad: 'login-required' }).then(authenticated => {
+            if (authenticated) {
+                document.getElementById('login_button').style.display = 'none'; // Hide login button
+                document.getElementById('logged_in_as').innerHTML = 'Logged in as ' + keycloak.tokenParsed.preferred_username;
+            }
+        }).catch(function() {
+            console.log('Failed to initialize authentication');
+        });
+        
+        document.getElementById('login_button').addEventListener('click', function() {
+            keycloak.login();
+        });
+    </script>
+</body>
+</html>
