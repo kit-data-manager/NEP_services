@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title>frontend</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/api.css') }}"/>
+    </head>
+    <body>
+        <h2>Query Results</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Attribute Value</th>
+                    <th>PID</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                    <tr>
+                        <td>{{ result.attributeValue_np }}</td>
+                        <td>{{ result.pid }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </body>
+</html>
