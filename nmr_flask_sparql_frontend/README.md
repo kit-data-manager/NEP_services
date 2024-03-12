@@ -26,13 +26,15 @@ The instructions are for a commpletely local test setup and will slighlty differ
     3. Enter an `Client ID` which represents this application (`nmr_flask` used here as example) and set `Client type` to `OpenID Connect`
     4. Click on `Next`, leave everything under `Capability Config` at its default value here and click `Next` again
     5. Set the following values under `Login Settings` (or similar ones matching your setup)
-| Option                          | Value                   | Annotation                                        |
-|---------------------------------|-------------------------|---------------------------------------------------|
-| Root URL                        | `http://localhost:8080` | Flask URL                                         |
-| Home URL                        |                         | Empty, defaults to Root URL                       |
-| Valid redirect URIs             | `/*`                    | Any path on this server                           |
-| Valid post logout redirect URIs | `-`                     | We do not use this so we disable it with a hyphen |
-| Web origins                     | `+`                     | A plus enables all valid redirect URIs            |
+
+        | Option                          | Value                   | Annotation                                        |
+        |---------------------------------|-------------------------|---------------------------------------------------|
+        | Root URL                        | `http://localhost:8080` | Flask URL                                         |
+        | Home URL                        |                         | Empty, defaults to Root URL                       |
+        | Valid redirect URIs             | `/*`                    | Any path on this server                           |
+        | Valid post logout redirect URIs | `-`                     | We do not use this so we disable it with a hyphen |
+        | Web origins                     | `+`                     | A plus enables all valid redirect URIs            |
+
 ### SPARQL
 1. Start the [stain/jena-fuseki](https://hub.docker.com/r/stain/jena-fuseki/) docker container, exposing port `3030`: `docker run -p 3030:3030 -e ADMIN_PASSWORD=password stain/jena-fuseki`
 2. Open the site in the browser http://localhost:3030 and login as user `admin` with password `password`
@@ -42,6 +44,7 @@ Note that this port should not be exposed to the outside world using the flask a
 ### Flask
 1. Install the required packages: `pip install -r requirements.txt`
 2. Configure all the environment variables in [.env](./.env)
+
 | Variable            | Default Value                             | Required | Description                                                  |
 |---------------------|-------------------------------------------|----------|--------------------------------------------------------------|
 | `FLASK_SECRET_KEY`  | `"secret"`                                | `true`   | Secret key to protect against cookie data tampering          |
@@ -51,6 +54,7 @@ Note that this port should not be exposed to the outside world using the flask a
 | `KEYCLOAK_REALM`    | `"master"`                                | `true`   | Keycloak client management group, "master",exists by default |
 | `KEYCLOAK_CLIENT`   | `"nmr_flask"`                             | `true`   | Keycloak client (application) id                             |
 | `DEBUG_MODE`        | `"true"`                                  | `false`  | Whether to run flask in debug mode                           |
+
 For deployment `DEBUG_MODE` **must** be set to false and `FLASK_SECRET_KEY` should be changed to a long random Base64 value.
 Additionally `http` should be replaced with `https`, especially for Keycloak.
 3. Start the application: `python3 app.py`
