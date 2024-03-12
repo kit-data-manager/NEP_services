@@ -6,8 +6,12 @@ from sparql_service import SPARQLService
 import keycloak
 import os
 import urllib.parse
+from functools import wraps
 
 KEYCLOAK_TOKEN_KEY = 'keycloak_token'
+KEYCLOAK_REFRESH_KEY = 'keycloak_refresh'
+
+DEFAULT_PATH = os.getenv('DEFAULT_PATH')
 
 app = Flask(__name__)
 
@@ -52,7 +56,18 @@ def query(keycloak, attribute, value):
 
 @app.route('/authenticate')
 def authenticate():
-    redirect_url = urllib.parse.unquote(request.args.get('redirect', '/'))
+    redirect_url = urllib.parse.unquote(request.args.get('redirect', DEFAULT_PATH))
+    refresh = request.cookies.get(KEYCLOAK_REFRESH_KEY)
+    if refresh:
+        try:
+            token = keycloak_service.refresh_token(refresh)
+            response = redirect(redirect_url)
+            response.set_cookie(KEYCLOAK_TOKEN_KEY, token['access_token'])
+            response.set_cookie(KEYCLOAK_REFRESH_KEY, token['refresh_token'])
+            print('refresh!')
+            return response
+        except Exception as e:
+            pass # we need to actually log in
     if get_and_validate_keycloak():
         return redirect(auth_url)
     target = url_for('authenticate_return', redirect=urllib.parse.quote(redirect_url), _external=True)
@@ -61,7 +76,7 @@ def authenticate():
 
 @app.route('/authenticate_return')
 def authenticate_return():
-    redirect_url = urllib.parse.unquote(request.args.get('redirect', '/'))
+    redirect_url = urllib.parse.unquote(request.args.get('redirect', DEFAULT_PATH))
     if get_and_validate_keycloak():
         return redirect(auth_url)
     code = request.args.get('code')
@@ -74,12 +89,10 @@ def authenticate_return():
         abort(400, 'Invalid auth code ' + str(e))
     response = redirect(redirect_url)
     response.set_cookie(KEYCLOAK_TOKEN_KEY, token['access_token'])
+    response.set_cookie(KEYCLOAK_REFRESH_KEY, token['refresh_token'])
     return response
 
-def execute_query(renderer: callable):
-    keycloak = get_and_validate_keycloak()
-    if keycloak is None:
-        return redirect(url_for('authenticate', redirect=urllib.parse.quote(request.url)))
+def execute_query(keycloak):
     attribute = request.args.get('record_attribute')
     value = request.args.get('attribute_value')
     if not value or not attribute:
@@ -87,21 +100,29 @@ def execute_query(renderer: callable):
     data = query(keycloak, attribute, value)
     return renderer(data)
 
+def keycloak(function):
+    @wraps(function)
+    def inner(*args, **kwargs):
+        keycloak = get_and_validate_keycloak()
+        if keycloak is None:
+            return redirect(url_for('authenticate', redirect=urllib.parse.quote(request.url)))
+        return function(keycloak, *args, **kwargs)
+    return inner
+
 @app.route('/')
-def frontend():
-    return execute_query(lambda data: render_template('frontend.html', results=data))
-
-
-@app.route('/foo')
-def foo():
-    return "Ok"
+@keycloak
+def frontend(keycloak):
+    data = execute_query(keycloak)
+    return render_template('frontend.html', results=data)
 
 @app.route('/api')
-def api():
+@keycloak
+def api(keycloak):
+    data = execute_query(keycloak)
     if 'User-Agent' in request.headers:
-        return execute_query(lambda data: render_template('api.html', data=json.dumps(data, indent=2)))
+        return render_template('api.html', data=json.dumps(data, indent=2))
     else:
-        return execute_query(lambda data: json.dumps(data, indent=2))
+        return json.dumps(data, indent=2)
 
 if __name__ == '__main__':
     app.run(host='localhost', port=8000)

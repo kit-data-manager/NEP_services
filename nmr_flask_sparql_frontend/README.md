@@ -47,6 +47,7 @@ Note that this port should not be exposed to the outside world using the flask a
 
 | Variable            | Default Value                             | Required | Description                                                  |
 |---------------------|-------------------------------------------|----------|--------------------------------------------------------------|
+| `DEFAULT_PATH`      | `"/"`                                     | `true`   | The default redirect                                         |
 | `FLASK_SECRET_KEY`  | `"secret"`                                | `true`   | Secret key to protect against cookie data tampering          |
 | `FLASK_URL`         | `"localhost:8000"`                        | `true`   | Public application url                                       |
 | `SPARQL_URL`        | `"http://localhost:3030/fdo_graph/query"` | `true`   | Private sparql url (port not exposed)                        |
