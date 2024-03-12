@@ -37,7 +37,6 @@ def get_and_validate_keycloak() -> str | None:
 
 def query(keycloak, attribute, value):
     sparql_query = sparql_service.construct_query(attribute, value)
-    print(sparql_query)
 
     query_result = sparql_service.execute_query(sparql_query)
 
@@ -57,6 +56,8 @@ def query(keycloak, attribute, value):
 @app.route('/authenticate')
 def authenticate():
     redirect_url = urllib.parse.unquote(request.args.get('redirect', DEFAULT_PATH))
+    if get_and_validate_keycloak():
+        return redirect(auth_url)
     refresh = request.cookies.get(KEYCLOAK_REFRESH_KEY)
     if refresh:
         try:
@@ -64,12 +65,9 @@ def authenticate():
             response = redirect(redirect_url)
             response.set_cookie(KEYCLOAK_TOKEN_KEY, token['access_token'])
             response.set_cookie(KEYCLOAK_REFRESH_KEY, token['refresh_token'])
-            print('refresh!')
             return response
         except Exception as e:
             pass # we need to actually log in
-    if get_and_validate_keycloak():
-        return redirect(auth_url)
     target = url_for('authenticate_return', redirect=urllib.parse.quote(redirect_url), _external=True)
     auth_url = keycloak_service.auth_url(urllib.parse.quote(target), scope='openid')
     return redirect(auth_url)
