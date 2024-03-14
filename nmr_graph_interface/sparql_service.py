@@ -36,7 +36,7 @@ class SPARQLService:
         else:
             return f"Failed to execute SPARQL query. Status code: {response.status_code}"
 
-    def construct_query(self, attribute, value):
+    def construct_query_1(self, attribute, value):
         """
         Constructs a SPARQL query to retrieve information about profiles and related FDOs.
 
@@ -59,6 +59,32 @@ class SPARQLService:
         BIND(REPLACE(STR(?attributeValue), "https://datamanager.kit.edu/FDO-Graph#", "") AS ?attributeValue_np)
         ?attributeValue fdoo:isValueFor ?fdo.
         ?fdo rdfs:label ?pid.
+        }}
+        """
+        return sparql_query
+
+    def construct_query_2(self, pid):
+        """
+        Constructs a SPARQL query to retrieve information about profiles and related FDOs.
+
+        Args:
+            profile_names (str): Comma-separated names of profiles.
+
+        Returns:
+            str: The constructed SPARQL query.
+        """
+        # Insert the attributes into the SPARQL query template
+        sparql_query = f"""
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX fdoo: <https://datamanager.kit.edu/FDO-Graph#>
+
+        SELECT ?attribute_np ?attributeValue_np 
+        WHERE {{
+        ?fdo rdfs:label "{pid}" .
+        ?fdo fdoo:hasAttributeValue ?attributeValue.
+        ?attributeValue fdoo:hasKey ?attribute.
+        BIND(REPLACE(STR(?attributeValue), "https://datamanager.kit.edu/FDO-Graph#", "") AS ?attributeValue_np)
+        BIND(REPLACE(STR(?attribute), "https://datamanager.kit.edu/FDO-Graph#", "") AS ?attribute_np)
         }}
         """
         return sparql_query

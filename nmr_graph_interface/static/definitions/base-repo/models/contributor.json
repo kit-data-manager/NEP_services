@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "format": "grid-strict",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "propertyOrder": 1,
+      "readOnly": true,
+      "options": {
+        "hidden": true
+      }
+    },
+    "contributionType": {
+      "type": "string",
+      "title":"Contribution Type",
+      "propertyOrder": 2,
+      "enum": ["CONTACT_PERSON", "DATA_COLLECTOR", "DATA_CURATOR", "DATA_MANAGER", "DISTRIBUTOR", "EDITOR", "HOSTING_INSTITUTION", "OTHER", "PRODUCER", "PROJECT_LEADER", "PROJECT_MANAGER", "PROJECT_MEMBER", "REGISTRATION_AGENCY", "REGISTRATION_AUTHORITY", "RELATED_PERSON", "RESEARCH_GROUP", "RIGHTS_HOLDER", "RESEARCHER", "SPONSOR", "SUPERVISOR", "WORK_PACKAGE_LEADER"],
+      "options": {
+        "grid_columns": 12,
+        "disable_collapse": false,
+        "disable_edit_json": true,
+        "disable_properties": true,
+        "compact": false,
+        "infoText": "The type of the contribution."
+      }
+    },
+    "user": {
+      "title": "Contributor",
+      "propertyOrder": 3,
+      "$ref": "agent.json",
+      "required": ["givenName", "familyName"],
+      "options": {
+        "grid_columns": 12,
+        "disable_collapse": true,
+        "disable_edit_json": true,
+        "disable_properties": true,
+        "compact": true
+      }
+    }
+  },
+  "required": ["contributionType", "user"]
+}

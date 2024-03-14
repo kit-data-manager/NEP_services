@@ -1,0 +1,53 @@
+{
+  "type": "object",
+  "title": "Resource Type",
+  "format": "grid-strict",
+  "description": "The type of the resource.",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "readOnly":true,
+      "propertyOrder":1,
+      "options": {
+        "hidden": true
+      }
+    },
+    "typeGeneral": {
+      "type": "string",
+      "title": "General Type",
+      "enum": [
+        "AUDIOVISUAL",
+        "COLLECTION",
+        "DATASET",
+        "EVENT",
+        "IMAGE",
+        "INTERACTIVE_RESOURCE",
+        "MODEL",
+        "PHYSICAL_OBJECT",
+        "SERVICE",
+        "SOFTWARE",
+        "SOUND",
+        "TEXT",
+        "WORKFLOW",
+        "OTHER"
+      ],
+      "default": "DATASET",
+      "options": {
+        "grid_columns": 6,
+        "infoText": "The general type."
+      }
+    },
+    "value": {
+      "type": "string",
+      "title": "Specific Type",
+      "options": {
+        "grid_columns": 6,
+        "infoText": "The specific type."
+      }
+    }
+  },
+  "required": [
+    "typeGeneral",
+    "value"
+  ]
+}

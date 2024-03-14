@@ -1,0 +1,76 @@
+<div class="ui divider"></div>
+<div class="ui padded grid">
+    <div class="ui fluid image">
+        {{#if (isOpen _source.read)}}
+            <a class="ui green left corner label">
+                <i class="lock open icon"></i>
+            </a>
+        {{else}}
+            <a class="ui red left corner label">
+                <i class="lock icon"></i>
+            </a>
+        {{/if}}
+    </div>
+    <!--row-->
+    <div class="ui row">
+        <div class="twelve wide column">
+            <h3 class="ui header" style="margin-left:40px">{{_source.metadata.titles.0.value}}</h3>
+        </div>
+        <!--div class="two wide column">
+            <a class="ui fluid orange label">
+                {{_index}}
+            </a>
+        </div-->
+        <div class="four wide  right floated column">
+            <span class="ui fluid blue label">
+                {{_source.metadata.resourceType.typeGeneral}}<br/>
+                <div class="detail">{{_source.metadata.resourceType.value}}</div>
+            </span>
+        </div>
+    </div>
+    <!--row-->
+    <div class="ui row">
+        <div class="column">
+             <span>{{#creatorsList _source.metadata.creators}}
+             {{/creatorsList}}</span>
+        </div>
+    </div>
+    <!--row-->
+    <div class="ui row">
+        <div class="column">
+            {{#if _source.metadata.descriptions.0.description}}
+                <i>{{_source.metadata.descriptions.0.description}}</i>
+            {{else}}
+                <i>No description available</i>
+            {{/if}}
+        </div>
+    </div>
+    <!--row-->
+    <div class="ui row">
+        <div class="four wide column">
+            <div class="ui fluid label">
+                Created at:<br/>
+                <div class="detail">{{formatDate _source.created}}</div>
+            </div>
+        </div>
+        <div class="four wide column">
+            <div class="ui fluid label">
+                Publisher:<br/>
+                <div class="detail">{{_source.metadata.publisher}}</div>
+            </div>
+        </div>
+        <div class="four wide column">
+            <div class="ui fluid label">
+                Publication Year:<br/>
+                <div class="detail">{{_source.metadata.publicationYear}}</div>
+            </div>
+        </div>
+        <div class="four wide right floated column">
+            <a class="ui fluid white label">
+                Show<br/>
+                <div class="detail more" data="{{_source.id}}">more...</div>
+            </a>
+        </div>
+    </div>
+</div>
+

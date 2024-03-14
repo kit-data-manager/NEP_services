@@ -1,0 +1,72 @@
+<div class="ui divider"></div>
+<div class="ui padded grid">
+    <div class="ui fluid image">
+        {{#if (isOpen _source.read)}}
+            <a class="ui green left corner label">
+                <i class="lock open icon"></i>
+            </a>
+        {{else}}
+            <a class="ui red left corner label">
+                <i class="lock icon"></i>
+            </a>
+        {{/if}}
+    </div>
+    <!--row-->
+    <div class="ui row">
+        <div class="twelve wide column">
+            <h3 class="ui header" style="margin-left:40px">{{_source.metadataRecord.id}}</h3>
+        </div>
+        <!--div class="two wide column">
+            <a class="ui fluid orange label">
+                {{_index}}
+            </a>
+        </div-->
+        <div class="four wide  right floated column">
+            <span class="ui fluid blue label">
+                Schema: {{idFromUrl _source.metadataRecord.schema.identifier}}<br/>
+                <div class="detail">Version: {{_source.metadataRecord.schemaVersion}}</div>
+            </span>
+        </div>
+    </div>
+    <!--row-->
+    <!--div class="ui row">
+        <div class="column">
+             <span>{#creatorsList _source.metadata.creators}
+             {/creatorsList}</span>
+        </div>
+    </div-->
+    <!--row-->
+    <div class="ui row">
+        <div class="column">
+            <b>Related Resource: </b><a href="{{_source.metadataRecord.relatedResource.identifier}}" target="_blank">{{idFromUrl _source.metadataRecord.relatedResource.identifier}}</a>
+        </div>
+    </div>
+    <!--row-->
+    <div class="ui row">
+        <div class="four wide column">
+            <div class="ui fluid label">
+                Created at:<br/>
+                <div class="detail">{{formatDate _source.metadataRecord.createdAt}}</div>
+            </div>
+        </div>
+        <div class="four wide column">
+            <div class="ui fluid label">
+                Last Modified:<br/>
+                <div class="detail">{{formatDate _source.metadataRecord.lastUpdate}}</div>
+            </div>
+        </div>
+        <div class="four wide column">
+            <div class="ui fluid label">
+                Version:<br/>
+                <div class="detail">{{_source.metadataRecord.recordVersion}}</div>
+            </div>
+        </div>
+        <div class="four wide right floated column">
+            <a class="ui fluid white label">
+                Show<br/>
+                <div class="detail more" data="{{_source.metadataRecord.id}}">more...</div>
+            </a>
+        </div>
+    </div>
+</div>
+

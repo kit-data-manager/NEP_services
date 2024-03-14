@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Main Index Page</title>
+</head>
+<body>
+    <h1>Warning</h1>
+
+    {% if error_msg %}
+        <div style="color: red;">
+            <strong>Error:</strong> {{ error_msg }}
+        </div>
+    {% endif %}
+
+   <!-- Back Button -->
+   <br>
+   <a href="/" class="back-button">Make a new prediction</a>
+</body>
+</html>

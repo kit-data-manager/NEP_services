@@ -1,0 +1,78 @@
+{
+  "type": "object",
+  "format": "grid-strict",
+  "headerTemplate": "{{self.relationType}}",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "options": {
+        "hidden": true
+      }
+    },
+    "relationType": {
+      "type": "string",
+      "propertyOrder": 1,
+      "title": "Relation Type",
+      "enum": ["IS_CITED_BY", "CITES", "IS_SUPPLEMENT_TO", "IS_SUPPLEMENTED_BY", "IS_CONTINUED_BY", "CONTINUES", "IS_NEW_VERSION_OF", "IS_PREVIOUS_VERSION_OF", "IS_PART_OF", "HAS_PART", "IS_REFERENCED_BY", "REFERENCES", "IS_DOCUMENTED_BY", "DOCUMENTS", "IS_COMPILED_BY", "COMPILES", "IS_VARIANT_FORM_OF", "IS_ORIGINAL_FORM_OF", "IS_IDENTICAL_TO", "HAS_METADATA", "IS_METADATA_FOR", "REVIEWS", "IS_REVIEWED_BY", "IS_DERIVED_FROM", "IS_SOURCE_OF"],
+      "options": {
+        "grid_columns": 12,
+        "infoText": "The type of the relation."
+      }
+    },
+    "identifierType": {
+      "type": "string",
+      "propertyOrder": 2,
+      "title": "Identifier Type",
+      "enum": [
+        "ARK",
+        "AR_XIV",
+        "BIBCODE",
+        "DOI",
+        "EAN_13",
+        "EISSN",
+        "HANDLE",
+        "IGSN",
+        "ISBN",
+        "ISSN",
+        "ISTC",
+        "LISSN",
+        "LSID",
+        "PMID",
+        "PURL",
+        "UPC",
+        "URL",
+        "URN",
+        "W_3_ID",
+        "INTERNAL",
+        "OTHER"
+      ],
+      "default": "DOI",
+      "options": {
+        "grid_columns": 4,
+        "infoText": "The type of the related identifier."
+      }
+    },
+    "value": {
+      "type": "string",
+      "propertyOrder": 3,
+      "title": "Value",
+      "options": {
+        "grid_columns": 8,
+        "infoText": "The related identifier value."
+      }
+    },
+    "relatedMetadataScheme": {
+      "type": "string",
+      "options": {
+        "grid_columns": 4,
+        "hidden": "true"
+      }
+    },
+    "scheme": {
+      "$ref": "scheme.json",
+      "options": {
+        "hidden": true
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+<div class="ui divider"></div>
+<div class="ui padded grid">
+    <!--row-->
+    <div class="ui row">
+        <div class="twelve wide column">
+            <h3 class="ui header" style="margin-left:40px">{{_source.pid}}</h3>
+        </div>
+        <div class="four wide  right floated column">
+            <span class="ui fluid blue label">
+                DataType: {{dataTypeFromPid _source.attributes.[21.T11148/1c699a5d1b4ad3ba4956]}}<br/>
+            </span>
+        </div>
+    </div>
+    <!--row-->
+    <div class="ui row">
+        <div class="column">
+            <b>Digital Object Location: </b><a href="{{_source.attributes.[21.T11148/b8457812905b83046284]}}" target="_blank">{{shortenLocation _source.attributes.[21.T11148/b8457812905b83046284]}}</a>
+        </div>
+    </div>
+    <!--row-->
+    <div class="ui row">
+        <div class="four wide column">
+            <div class="ui fluid label">
+                Created at:<br/>
+                <div class="detail">{{formatDate _source.created}}</div>
+            </div>
+        </div>
+        <div class="four wide column">
+            <div class="ui fluid label">
+                Last Modified:<br/>
+                <div class="detail">{{formatDate _source.lastUpdate}}</div>
+            </div>
+        </div>
+        <div class="four wide column">
+            <div class="ui fluid label">
+                Version:<br/>
+                <div class="detail">{{formatVersion _source.attributes.[21.T11148/c692273deb2772da307f]}}</div>
+            </div>
+        </div>
+        <div class="four wide right floated column">
+            <a class="ui fluid white label">
+                Show<br/>
+                <div class="detail more" data="{{_source.pid}}">more...</div>
+            </a>
+        </div>
+    </div>
+</div>
+
