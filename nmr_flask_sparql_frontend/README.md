@@ -31,7 +31,7 @@ The instructions are for a commpletely local test setup and will slighlty differ
         |---------------------------------|-------------------------|---------------------------------------------------|
         | Root URL                        | `http://localhost:8080` | Flask URL                                         |
         | Home URL                        |                         | Empty, defaults to Root URL                       |
-        | Valid redirect URIs             | `/*`                    | Any path on this server                           |
+        | Valid redirect URIs             | `*`                     | Any path                                          |
         | Valid post logout redirect URIs | `-`                     | We do not use this so we disable it with a hyphen |
         | Web origins                     | `+`                     | A plus enables all valid redirect URIs            |
 
