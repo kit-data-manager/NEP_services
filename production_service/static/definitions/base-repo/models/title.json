@@ -1,0 +1,46 @@
+{
+    "type": "object",
+    "title": "Title",
+    "format": "grid-strict",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "readOnly":true,
+        "options": {
+          "hidden": true
+        }
+      },
+      "lang": {
+        "title": "Language",
+        "$ref": "language.json",
+        "propertyOrder":2,
+        "options":{
+          "grid_columns":6,
+          "infoText": "The title language."
+        }
+      },
+      "titleType": {
+        "type": "string",
+        "title": "Title Type",
+        "propertyOrder":1,
+        "allowEmpty": false,
+        "enum": ["ALTERNATIVE_TITLE", "SUBTITLE", "TRANSLATED_TITLE", "OTHER", ""],
+        "default": "",
+        "options":{
+          "grid_columns":6,
+          "infoText": "The title type."
+        }
+      },
+      "value": {
+        "type": "string",
+        "title":"Value",
+        "propertyOrder":3,
+        "options":{
+          "grid_columns":12,
+          "infoText": "The title value."
+        }
+
+      }
+    },
+    "required":["value"]
+  }

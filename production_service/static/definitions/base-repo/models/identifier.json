@@ -1,0 +1,52 @@
+{
+  "type": "object",
+  "format": "grid-strict",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "options": {
+        "hidden": true
+      }
+    },
+    "identifierType": {
+      "type": "string",
+      "title": "Identifier Type",
+      "enum": [
+        "ARK",
+        "AR_XIV",
+        "BIBCODE",
+        "DOI",
+        "EAN_13",
+        "EISSN",
+        "HANDLE",
+        "IGSN",
+        "ISBN",
+        "ISSN",
+        "ISTC",
+        "LISSN",
+        "LSID",
+        "PMID",
+        "PURL",
+        "UPC",
+        "URL",
+        "URN",
+        "W_3_ID",
+        "INTERNAL",
+        "OTHER"
+      ],
+      "default": "DOI",
+      "options": {
+        "grid_columns": 4,
+        "infoText": "The type of the identifier."
+      }
+    },
+    "value": {
+      "type": "string",
+      "title": "Value",
+      "options": {
+        "grid_columns": 8,
+        "infoText": "The identifier value."
+      }
+    }
+  }
+}

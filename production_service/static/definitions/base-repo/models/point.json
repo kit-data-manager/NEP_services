@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "title": "Point",
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "latitude": {
+      "type": "number"
+    },
+    "longitude": {
+      "type": "number"
+    }
+  }
+}

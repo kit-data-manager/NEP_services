@@ -1,0 +1,89 @@
+{
+  "type": "object",
+  "format": "grid-strict",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "options": {
+        "hidden": true
+      }
+    },
+    "funderName": {
+      "title": "Funder Name",
+      "propertyOrder": 1,
+      "type": "string",
+      "options": {
+        "grid_columns": 12,
+        "infoText": "The funder name."
+      }
+    },
+    "funderIdentifier": {
+      "type": "object",
+      "format": "grid-strict",
+      "propertyOrder": 2,
+      "title": "Funder Identifier",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "options": {
+            "hidden": true
+          }
+        },
+        "identifierType": {
+          "type": "string",
+          "title": "Identifier Type",
+          "enum": ["ARK", "AR_XIV", "BIBCODE", "DOI", "EAN_13", "EISSN", "HANDLE", "IGSN", "ISBN", "ISSN", "ISTC", "LISSN", "LSID", "PMID", "PURL", "UPC", "URL", "URN", "W_3_ID", "INTERNAL", "OTHER"],
+          "default": "DOI",
+          "options": {
+            "grid_columns": 6,
+            "infoText": "The funder identifier type."
+          }
+        },
+        "type": {
+          "type": "string",
+          "title": "Identifier Issuer",
+          "enum": ["ISNI", "GRID", "CROSSREF_FUNDER_ID", "OTHER"],
+          "options": {
+            "grid_columns": 6,
+            "infoText": "The funder identifier issuer."
+          }
+        },
+        "value": {
+          "type": "string",
+          "title": "Value",
+          "options": {
+            "grid_columns": 12,
+            "infoText": "The funder identifier value."
+          }
+        }
+      },
+      "options": {
+        "collapsed": true
+      }
+    },
+    "awardTitle": {
+      "type": "string",
+      "propertyOrder": 3,
+      "title": "Award Title",
+      "options": {
+        "grid_columns": 6
+      }
+    },
+    "awardUri": {
+      "type": "string",
+      "propertyOrder": 4,
+      "title": "Award URI",
+      "options": {
+        "grid_columns": 6
+      }
+    },
+    "awardNumber": {
+      "propertyOrder": 5,
+      "title": "Award Number",
+      "$ref": "scheme.json",
+      "options": {
+        "collapsed": true
+      }
+    }
+  }
+}
