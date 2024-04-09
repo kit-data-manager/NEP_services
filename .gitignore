@@ -2,3 +2,4 @@ nep_venv/
 __pycache__/
 *.log
 *.env
+temporary/*
