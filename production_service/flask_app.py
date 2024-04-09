@@ -17,6 +17,7 @@ import json
 from apscheduler.schedulers.background import BackgroundScheduler
 import shutil
 from dotenv import load_dotenv
+from werkzeug.exceptions import HTTPException
 
 load_dotenv() # This loads the variables from .env into the environment
 app = Flask(__name__)
@@ -65,6 +66,7 @@ scheduler.add_job(func=delete_old_images, trigger="interval", hours=1)
 scheduler.start()
 
 def monitoring(token):
+    return
     url = 'https://be.nffa.eu/api/v2/monitoring/access/'
     # Headers as a dictionary
     headers = {
@@ -219,7 +221,7 @@ def render_results_mri_pred():
 def receive_token_nmr_graph():
     token = request.json.get('token')
     session['keycloak_token_nmr_graph'] = token
-    print("Received token for nmr graph:", token)
+    # print("Received token for nmr graph:", token)
     monitoring(token)
     return jsonify({"status": "Token received successfully"})
 
@@ -227,7 +229,7 @@ def receive_token_nmr_graph():
 def receive_token_mri_pred():
     token = request.json.get('token')
     session['keycloak_token_mri_pred'] = token
-    print("Received token for mri prediction:", token)
+    # print("Received token for mri prediction:", token)
     monitoring(token)
     return jsonify({"status": "Token received successfully"})
 
@@ -374,6 +376,15 @@ def serve_temp_file(filename):
     temp_directory = session['temp_directory']
     return send_from_directory(temp_directory, filename)
 
+@app.errorhandler(Exception)
+def handle_exception(e):
+    if isinstance(e, HTTPException):
+        print(f'{e.code}: {e.name} {e.description}')
+        return render_template('error.html', error_code=e.code, error_title=e.name, error_msg=e.description)
+    print(f'{type(e).__name__}: {e}')
+    return render_template('error.html', error_title=type(e).__name__, error_msg=f'{e}')
+
+
 def scale(array):
     array = (array / 127.5) - 1
     return array
@@ -381,5 +392,6 @@ def scale(array):
 def rescale(array):
     array = (array + 1) * 127.5
     return array
+
 if __name__ == '__main__':
     app.run(host='localhost', port=8000, debug=True)
