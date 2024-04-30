@@ -17,9 +17,15 @@ import json
 from apscheduler.schedulers.background import BackgroundScheduler
 import shutil
 from dotenv import load_dotenv
+#import for Proxy fix
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 load_dotenv() # This loads the variables from .env into the environment
 app = Flask(__name__)
+
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+)
 
 current_dir = os.path.dirname(__file__)
 
@@ -67,10 +73,11 @@ scheduler.start()
 def monitoring(token):
     url = 'https://be.nffa.eu/api/v2/monitoring/access/'
     # Headers as a dictionary
+    print(f'YOU ARE HERE:::::{token}')
     headers = {
         'accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': token
+        'Authorization': "Bearer " + token
     }
 
     # Payload as a dictionary
@@ -83,7 +90,7 @@ def monitoring(token):
     response = requests.post(url, headers=headers, data=json.dumps(payload))
 
     # Check the response
-    if response.status_code == 200:
+    if response.status_code == 201:
         print("Success:", response.json())
     else:
         print("Error:", response.status_code, response.text)
@@ -92,7 +99,7 @@ def monitoring(token):
 def execute_query():
     """
     Execute the SPARQL query.
-
+ 
     :return: The rendered template or a redirect.
     """
     
@@ -103,7 +110,7 @@ def execute_query():
         if attribute:
             sparql_query = sparql_service.construct_query_1(attribute, value)
             # Execute SPARQL query and get PIDs
-            query_result = sparql_service.execute_query(sparql_query)
+            query_result = sparql_service.execute_query(sparql_query, "attributeValue_np", "pid")
             # Extract 'attributeValue_np' and 'pid' from the results
             results_list = [
                 {
@@ -121,19 +128,19 @@ def execute_query():
                 print(f"Directory '{user_id[:5]}' created at '{path2}'.")
             else:
                 print(f"Directory '{user_id[:5]}' already exists at '{path2}'.")
-
+ 
             path3 = os.path.join(path2, 'attribute_list.json')
-
+ 
             with open(path3, 'w') as file:
                 json.dump(results_list, file)
-
+ 
             session['attribute'] = attribute
             session['attribute_search_results'] = path3
             return redirect(url_for('render_results_nmr_graph', request_type="attribute_and_value"))
         elif pid:
             sparql_query = sparql_service.construct_query_2(pid)
             # Execute SPARQL query and get PIDs
-            query_result = sparql_service.execute_query(sparql_query)
+            query_result = sparql_service.execute_query(sparql_query, "attribute_np", "attributeValue_np")
             # Extract 'attributeValue_np' and 'pid' from the results
             results_list = [
                 {
@@ -151,12 +158,12 @@ def execute_query():
                 print(f"Directory '{user_id[:5]}' created at '{path2}'.")
             else:
                 print(f"Directory '{user_id[:5]}' already exists at '{path2}'.")
-
+ 
             path3 = os.path.join(path2, 'pidlist.json')
-
+ 
             with open(path3, 'w') as file:
                 json.dump(results_list, file)
-
+ 
             session['pid'] = pid
             session['fdo_search_results'] = path3
             return redirect(url_for('render_results_nmr_graph', request_type="pid"))
@@ -170,7 +177,7 @@ def index():
 
     :return: A redirect.
     """
-    return redirect('/execute_query')
+    return redirect('./execute_query')
     #should lead to dashboard
 
 
@@ -203,16 +210,21 @@ def render_results_nmr_graph():
         return render_template('results_attributes_values.html', attribute=attribute, results=attribute_search_results)
 
 
-@app.route('/render_results_mri_pred')
+@app.route('/render_results_mri_pred', methods=['GET', 'POST'])
 def render_results_mri_pred():
     """
     Redirect to the execute_query route.
 
     :return: A redirect.
     """
+    print("Inside render_results_mri_pred")
+    print(f'Session: {session}')
     dicom_data_url = session.get('dicom_data_url')
     prediction_image_url = session.get('prediction_image_url')
     orig_image_url = session.get('orig_image_url')
+    print(dicom_data_url)
+    print(prediction_image_url)
+    print(orig_image_url)
     return render_template('return_pred_image.html', dicom_file_path=dicom_data_url, predicted_image_path=prediction_image_url, original_image_path=orig_image_url, time=int(time.time()))
 
 @app.route('/receive_token_nmr_graph', methods=['POST'])
@@ -226,6 +238,7 @@ def receive_token_nmr_graph():
 @app.route('/receive_token_mri_pred', methods=['POST'])
 def receive_token_mri_pred():
     token = request.json.get('token')
+    print(f'Token: {token}')
     session['keycloak_token_mri_pred'] = token
     print("Received token for mri prediction:", token)
     monitoring(token)
@@ -233,6 +246,7 @@ def receive_token_mri_pred():
 
 @app.route('/prediction', methods=['GET', 'POST'])
 def prediction():
+    print('PREDICTION')
     if request.method == 'POST':
         # Get the uploaded image file
         image = request.files['image']
@@ -339,11 +353,15 @@ def prediction():
             session['prediction_image_url'] = prediction_image_url
             session['orig_image_url'] = orig_image_url
 
+            print('Inside prediction()')
+            print(f'Session: {session}')
+
             return redirect(url_for('render_results_mri_pred'))
 
         else:
-            render_template('error.html', error_msg='Invalid file format. Please upload a DICOM file.')
+            return render_template('error.html', error_msg='Invalid file format. Please upload a DICOM file.')
 
+    print('GET REQUEST')
     return render_template('prediction.html')
 
 @app.route('/download')
@@ -382,4 +400,5 @@ def rescale(array):
     array = (array + 1) * 127.5
     return array
 if __name__ == '__main__':
-    app.run(host='localhost', port=8000, debug=True)
+    app.run(host='metarepo.nffa.eu', port=8000, debug=True)
+    # app.run(host='0.0.0.0', port=8000, debug=True)
