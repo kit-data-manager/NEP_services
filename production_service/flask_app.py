@@ -90,89 +90,94 @@ def monitoring(token):
     else:
         print("Error:", response.status_code, response.text)
 
-@app.route('/execute_query', methods=['GET', 'POST'])
+
+@app.route('/start_query')
+def start_query():
+    # display the form for SPARQL query submission
+    return render_template('start_query.html')
+
+@app.route('/execute_query')
 def execute_query():
     """
     Execute the SPARQL query.
 
     :return: The rendered template or a redirect.
     """
-    
-    if request.method == 'POST':
-        attribute = request.form.get('record_attribute')
-        value = request.form.get('attribute_value')
-        pid = request.form.get('pid')
-        if attribute:
-            sparql_query = sparql_service.construct_query_1(attribute, value)
-            # Execute SPARQL query and get PIDs
-            query_result = sparql_service.execute_query(sparql_query)
-            # Extract 'attributeValue_np' and 'pid' from the results
-            results_list = [
-                {
-                    'attributeValue_np': result['attributeValue_np']['value'],
-                    'pid': result['pid']['value']
-                }
-                for result in query_result['results']['bindings']
-            ]
-            user_id = session['keycloak_token_nmr_graph']
-            path1 = os.path.join(os.getcwd(), "temporary/")
-            path2 = os.path.join(path1, user_id[:5])
-            # Check if the directory already exists to avoid an error
-            if not os.path.exists(path2):
-                os.makedirs(path2)
-                print(f"Directory '{user_id[:5]}' created at '{path2}'.")
-            else:
-                print(f"Directory '{user_id[:5]}' already exists at '{path2}'.")
 
-            path3 = os.path.join(path2, 'attribute_list.json')
+    attribute = request.args.get('record_attribute')
+    value = request.args.get('attribute_value')
+    pid = request.args.get('pid')
+    query = request.args.get('query')
+    if query == 'query_attribute':
+        sparql_query = sparql_service.construct_query_1(attribute, value)
+        # Execute SPARQL query and get PIDs
+        query_result = sparql_service.execute_query(sparql_query)
+        # Extract 'attributeValue_np' and 'pid' from the results
+        results_list = [
+            {
+                'attributeValue_np': result['attributeValue_np']['value'],
+                'pid': result['pid']['value']
+            }
+            for result in query_result['results']['bindings']
+        ]
+        user_id = session['keycloak_token_nmr_graph']
+        path1 = os.path.join(os.getcwd(), "temporary/")
+        path2 = os.path.join(path1, user_id[:5])
+        # Check if the directory already exists to avoid an error
+        if not os.path.exists(path2):
+            os.makedirs(path2)
+            print(f"Directory '{user_id[:5]}' created at '{path2}'.")
+        else:
+            print(f"Directory '{user_id[:5]}' already exists at '{path2}'.")
 
-            with open(path3, 'w') as file:
-                json.dump(results_list, file)
+        path3 = os.path.join(path2, 'attribute_list.json')
 
-            session['attribute'] = attribute
-            session['attribute_search_results'] = path3
-            return redirect(url_for('render_results_nmr_graph', request_type="attribute_and_value"))
-        elif pid:
-            sparql_query = sparql_service.construct_query_2(pid)
-            # Execute SPARQL query and get PIDs
-            query_result = sparql_service.execute_query(sparql_query)
-            # Extract 'attributeValue_np' and 'pid' from the results
-            results_list = [
-                {
-                    'attribute': result['attribute_np']['value'],
-                    'attributeValue_np': result['attributeValue_np']['value']
-                }
-                for result in query_result['results']['bindings']
-            ]
-            user_id = session['keycloak_token_nmr_graph']
-            path1 = os.path.join(os.getcwd(), "temporary/")
-            path2 = os.path.join(path1, user_id[:5])
-            # Check if the directory already exists to avoid an error
-            if not os.path.exists(path2):
-                os.makedirs(path2)
-                print(f"Directory '{user_id[:5]}' created at '{path2}'.")
-            else:
-                print(f"Directory '{user_id[:5]}' already exists at '{path2}'.")
+        with open(path3, 'w') as file:
+            json.dump(results_list, file)
 
-            path3 = os.path.join(path2, 'pidlist.json')
+        session['attribute'] = attribute
+        session['attribute_search_results'] = path3
+        return redirect(url_for('render_results_nmr_graph', request_type="attribute_and_value", **request.args))
+    elif query == 'query_pid':
+        sparql_query = sparql_service.construct_query_2(pid)
+        # Execute SPARQL query and get PIDs
+        query_result = sparql_service.execute_query(sparql_query)
+        # Extract 'attributeValue_np' and 'pid' from the results
+        results_list = [
+            {
+                'attribute': result['attribute_np']['value'],
+                'attributeValue_np': result['attributeValue_np']['value']
+            }
+            for result in query_result['results']['bindings']
+        ]
+        user_id = session['keycloak_token_nmr_graph']
+        path1 = os.path.join(os.getcwd(), "temporary/")
+        path2 = os.path.join(path1, user_id[:5])
+        # Check if the directory already exists to avoid an error
+        if not os.path.exists(path2):
+            os.makedirs(path2)
+            print(f"Directory '{user_id[:5]}' created at '{path2}'.")
+        else:
+            print(f"Directory '{user_id[:5]}' already exists at '{path2}'.")
 
-            with open(path3, 'w') as file:
-                json.dump(results_list, file)
+        path3 = os.path.join(path2, 'pidlist.json')
 
-            session['pid'] = pid
-            session['fdo_search_results'] = path3
-            return redirect(url_for('render_results_nmr_graph', request_type="pid"))
-    # For GET request, display the form for SPARQL query submission
-    return render_template('start_query.html')
+        with open(path3, 'w') as file:
+            json.dump(results_list, file)
+
+        session['pid'] = pid
+        session['fdo_search_results'] = path3
+        return redirect(url_for('render_results_nmr_graph', request_type="pid", **request.args))
+    return redirect(url_for('start_query', **request.args))
 
 @app.route('/')
 def index():
     """
-    Redirect to the execute_query route.
+    Redirect to the start_query route.
 
     :return: A redirect.
     """
-    return redirect('/execute_query')
+    return redirect('/start_query')
     #should lead to dashboard
 
 
@@ -184,6 +189,11 @@ def render_results_nmr_graph():
     :return: A redirect.
     """
     request_type=request.args.get('request_type', default=None)
+
+    args = { **request.args }
+    if request_type:
+        del args['request_type']
+    query_request_url = url_for('start_query', **args)
     
     if request_type=="pid":
         pid = session.get('pid')
@@ -193,7 +203,7 @@ def render_results_nmr_graph():
         if fdo_search_results is None:
             print("no results found")
             return render_template('error.html')
-        return render_template('results_pids.html', pid=pid, results=fdo_search_results)
+        return render_template('results_pids.html', pid=pid, results=fdo_search_results, query_request_url=query_request_url)
     if request_type=="attribute_and_value":
         attribute = session.get('attribute')
         attribute_search_results_dir = session.get('attribute_search_results')
@@ -202,8 +212,8 @@ def render_results_nmr_graph():
         if attribute_search_results is None:
             print("no results found")
             return render_template('error.html')
-        return render_template('results_attributes_values.html', attribute=attribute, results=attribute_search_results)
-
+        return render_template('results_attributes_values.html', attribute=attribute, results=attribute_search_results, query_request_url=query_request_url)
+    return abort(400, f'Invalid request type `{request_type}`')
 
 @app.route('/render_results_mri_pred')
 def render_results_mri_pred():
@@ -212,10 +222,13 @@ def render_results_mri_pred():
 
     :return: A redirect.
     """
+    args = { **request.args }
+    query_request_url = url_for('prediction', **args)
+
     dicom_data_url = session.get('dicom_data_url')
     prediction_image_url = session.get('prediction_image_url')
     orig_image_url = session.get('orig_image_url')
-    return render_template('return_pred_image.html', dicom_file_path=dicom_data_url, predicted_image_path=prediction_image_url, original_image_path=orig_image_url, time=int(time.time()))
+    return render_template('return_pred_image.html', dicom_file_path=dicom_data_url, predicted_image_path=prediction_image_url, original_image_path=orig_image_url, time=int(time.time()), query_request_url=query_request_url)
 
 @app.route('/receive_token_nmr_graph', methods=['POST'])
 def receive_token_nmr_graph():
@@ -378,11 +391,16 @@ def serve_temp_file(filename):
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    if isinstance(e, HTTPException):
-        print(f'{e.code}: {e.name} {e.description}')
-        return render_template('error.html', error_code=e.code, error_title=e.name, error_msg=e.description)
-    print(f'{type(e).__name__}: {e}')
-    return render_template('error.html', error_title=type(e).__name__, error_msg=f'{e}')
+    if isinstance(e, Exception):
+        try:
+            import traceback
+            traceback.print_tb(e)
+        except Exception:
+            pass
+        print(f'{type(e).__name__}: {e}')
+        return render_template('error.html', error_title=type(e).__name__, error_msg=f'{e}')
+    print(f'{e.code}: {e.name} {e.description}')
+    return render_template('error.html', error_code=e.code, error_title=e.name, error_msg=e.description)
 
 
 def scale(array):

@@ -182,37 +182,54 @@
                     NMRXiV - <a href="https://nmrxiv.org/">nmrxiv.org</a> and BMRB - <a href="https://bmrb.io/">bmrb.io</a>). Each data resource has been represented
                     as a FAIR Digital NMR Object (FDO) that has a unique Persistent IDentifier (PID) and a set of
                     metadata to easily identfiy and characterize an NMR resource. </p>
-                <form id="queryForm" action="/execute_query" method="post">
-                    <!-- Group for record attribute and value -->
-                    <div class="search-fields" style="margin-bottom: 15px;">
-                        <p>Query for a particular attribute and regex of a value that occur in an information record to
-                            display all matching attribute values and the corresponding PID of the FDO.</p>
-                        <input type="radio" value="1" name="search_type" />
-                        <input type="text" name="record_attribute" id="record_attribute" class="search-field"
-                            placeholder="Record Attribute">
-                        <input type="text" name="attribute_value" id="attribute_value" class="search-field"
-                            placeholder="Attribute Value">
+                <div>
+                    <div>
+                        <!-- Group for record attribute and value -->
+                        <div class="search-fields" style="margin-bottom: 15px;">
+                            <p>Query for a particular attribute and regex of a value that occur in an information record to
+                                display all matching attribute values and the corresponding PID of the FDO.</p>
+                            <input type="radio" value="1" name="search_type" id="query_attribute" />
+                            <input type="text" name="record_attribute" id="record_attribute" class="search-field"
+                                placeholder="Record Attribute">
+                            <input type="text" name="attribute_value" id="attribute_value" class="search-field"
+                                placeholder="Attribute Value">
+                        </div>
+                        <!-- Group for PID -->
+                        <div class="search-fields">
+                            <p>Query for a particular PID of a FDO to display all attributes and their values of its
+                                information record.</p>
+                            <input type="radio" value="1" name="search_type" id="query_pid" />
+                            <input type="text" name="pid" id="pid" class="search-field" placeholder="PID">
+                        </div>
                     </div>
-                    <!-- Group for PID -->
-                    <div class="search-fields">
-                        <p>Query for a particular PID of a FDO to display all attributes and their values of its
-                            information record.</p>
-                        <input type="radio" value="1" name="search_type" />
-                        <input type="text" name="pid" id="pid" class="search-field" placeholder="PID">
-                    </div>
-                    <button type="submit" style="margin-top: 10px;">Execute Query</button>
-                </form>
+                    <button id="submit_query" style="margin-top: 10px;">Execute Query</button>
+                    <button id="clear_query" style="margin-top: 10px;">Clear</button>
+                </div>
 
                 <script>
+                    var params = new URLSearchParams(window.location.search);
+                    var query_type = params.get("query", "");
+
                     var all = $("input:radio[name='search_type']");
-                    var first = all.first();
-                    first.prop("checked", true);
-                    first.prop("disabled", true);
-                    first.siblings().filter("input").prop("disabled", false);
-                    var others = all.not(":first");
+                    var active = undefined;
+                    all.each((_, e) => {
+                        if (e.id == query_type) {
+                            active = $(e);
+                        }
+                    });
+                    if (active == undefined) {
+                        active = all.first();
+                    }
+                    active.prop("checked", true);
+                    active.prop("disabled", true);
+                    active.siblings().filter("input").prop("disabled", false);
+                    var others = all.filter((_, e) => e.id != active.get()[0].id);
                     others.prop("checked", false);
                     others.prop("disabled", false);
                     others.siblings().filter("input").prop("disabled", true);
+                    all.siblings().filter("input").each((_, e) => {
+                        e.value = params.get(e.id, "");
+                    });
                     $("input:radio[name='search_type']").on('click', function() {
                         var $box = $(this);
                         if ($box.is(":checked")) {
@@ -229,6 +246,22 @@
                             $box.siblings().filter("input").prop("disabled", true);
                         }
                     });
+
+                    $("#submit_query").bind("click", (event) => {
+                        var all = $("input:radio[name='search_type']");
+                        var selected = all.filter(":disabled").first();
+                        var params = all.siblings().filter('input')
+                            .map((_, v) => v.name + "=" + v.value)
+                            .get()
+                            .join("&");
+
+                        window.location.href = "/execute_query?query=" + selected.get()[0].id + "&" + params;
+                        $.redirect("", args, "POST");
+                    });
+
+                    $("#clear_query").bind("click", (event) => {
+                        window.location.href = "/start_query";
+                    })
                 </script>
 
                 <div class="documentation">
