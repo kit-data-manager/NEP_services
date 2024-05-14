@@ -10,3 +10,6 @@ Flask-Session
 apscheduler
 python-dotenv
 gunicorn
+Flask-Assets
+jsmin
+cssmin
