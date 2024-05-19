@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, send_file, send_from_directory, redirect, session, jsonify, url_for
+import random
 import os
 from sparql_service import SPARQLService
 from functools import wraps
@@ -26,7 +27,7 @@ current_dir = os.path.dirname(__file__)
 
 #app.secret_key = os.environ.get('SECRET_KEY', 'default-secret-key-for-development-only')
 app.secret_key = os.environ.get('SECRET_KEY')
-sparql_service = sparql_service = SPARQLService("http://localhost:3030/fdo_graph/query")
+sparql_service = sparql_service = SPARQLService()
 
 def delete_old_images():
     folder = os.path.join(os.getcwd(), "temporary/")
@@ -113,30 +114,31 @@ def execute_query():
         # Execute SPARQL query and get PIDs
         query_result = sparql_service.execute_query(sparql_query)
         # Extract 'attributeValue_np' and 'pid' from the results
+        print(query_result)
         results_list = [
             {
-                'attributeValue_np': result['attributeValue_np']['value'],
-                'pid': result['pid']['value']
+                'attributeValue_np': result['attributeValue_np'].value,
+                'pid': result['pid'].value
             }
-            for result in query_result['results']['bindings']
+            for result in query_result
         ]
-        user_id = session['keycloak_token_nmr_graph']
-        path1 = os.path.join(os.getcwd(), "temporary/")
-        path2 = os.path.join(path1, user_id[:5])
+        user_id = session['keycloak_token_nmr_graph'] if 'keycloak_token_nmr_graph' in session else ''.join(random.choice('0123456789abcdef') for n in range(5))
+        path = os.path.join(os.getcwd(), "temporary/")
+        path = os.path.join(path, user_id[:5])
         # Check if the directory already exists to avoid an error
-        if not os.path.exists(path2):
-            os.makedirs(path2)
-            print(f"Directory '{user_id[:5]}' created at '{path2}'.")
+        if not os.path.exists(path):
+            os.makedirs(path)
+            print(f"Directory '{user_id[:5]}' created at '{path}'.")
         else:
-            print(f"Directory '{user_id[:5]}' already exists at '{path2}'.")
+            print(f"Directory '{user_id[:5]}' already exists at '{path}'.")
 
-        path3 = os.path.join(path2, 'attribute_list.json')
+        path = os.path.join(path, 'attribute_list.json')
 
-        with open(path3, 'w') as file:
+        with open(path, 'w') as file:
             json.dump(results_list, file)
 
         session['attribute'] = attribute
-        session['attribute_search_results'] = path3
+        session['attribute_search_results'] = path
         return redirect(url_for('render_results_nmr_graph', request_type="attribute_and_value", **request.args))
     elif query == 'query_pid':
         sparql_query = sparql_service.construct_query_2(pid)
@@ -145,28 +147,28 @@ def execute_query():
         # Extract 'attributeValue_np' and 'pid' from the results
         results_list = [
             {
-                'attribute': result['attribute_np']['value'],
-                'attributeValue_np': result['attributeValue_np']['value']
+                'attribute': result['attribute_np'].value,
+                'attributeValue_np': result['attributeValue_np'].value
             }
-            for result in query_result['results']['bindings']
+            for result in query_result
         ]
-        user_id = session['keycloak_token_nmr_graph']
-        path1 = os.path.join(os.getcwd(), "temporary/")
-        path2 = os.path.join(path1, user_id[:5])
+        user_id = session['keycloak_token_nmr_graph'] if 'keycloak_token_nmr_graph' in session else ''.join(random.choice('0123456789abcdef') for n in range(5))
+        path = os.path.join(os.getcwd(), "temporary/")
+        path = os.path.join(path, user_id[:5])
         # Check if the directory already exists to avoid an error
-        if not os.path.exists(path2):
-            os.makedirs(path2)
-            print(f"Directory '{user_id[:5]}' created at '{path2}'.")
+        if not os.path.exists(path):
+            os.makedirs(path)
+            print(f"Directory '{user_id[:5]}' created at '{path}'.")
         else:
-            print(f"Directory '{user_id[:5]}' already exists at '{path2}'.")
+            print(f"Directory '{user_id[:5]}' already exists at '{path}'.")
 
-        path3 = os.path.join(path2, 'pidlist.json')
+        path = os.path.join(path, 'pidlist.json')
 
-        with open(path3, 'w') as file:
+        with open(path, 'w') as file:
             json.dump(results_list, file)
 
         session['pid'] = pid
-        session['fdo_search_results'] = path3
+        session['fdo_search_results'] = path
         return redirect(url_for('render_results_nmr_graph', request_type="pid", **request.args))
     return redirect(url_for('start_query', **request.args))
 
@@ -320,10 +322,10 @@ def prediction():
             prediction_image = Image.fromarray(prediction.squeeze().numpy())
             orig_image = Image.fromarray(image_tensor_normalized.squeeze().numpy())
 
-            user_id = session['keycloak_token_mri_pred']
+            user_id = session['keycloak_token_nmr_pred'] if 'keycloak_token_nmr_pred' in session else ''.join(random.choice('0123456789abcdef') for n in range(5))
 
-            path1 = os.path.join(os.getcwd(), "temporary/")
-            path = os.path.join(path1, user_id[:5])
+            path = os.path.join(os.getcwd(), "temporary/")
+            path = os.path.join(path, user_id[:5])
 
             # Check if the directory already exists to avoid an error
             if not os.path.exists(path):
@@ -391,16 +393,17 @@ def serve_temp_file(filename):
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    if isinstance(e, Exception):
-        try:
-            import traceback
-            traceback.print_tb(e)
-        except Exception:
-            pass
-        print(f'{type(e).__name__}: {e}')
-        return render_template('error.html', error_title=type(e).__name__, error_msg=f'{e}')
-    print(f'{e.code}: {e.name} {e.description}')
-    return render_template('error.html', error_code=e.code, error_title=e.name, error_msg=e.description)
+    if isinstance(e, HTTPException):
+        print(f'{e.code}: {e.name} {e.description}')
+        return render_template('error.html', error_code=e.code, error_title=e.name, error_msg=e.description)
+    try:
+        import traceback
+        print(''.join(traceback.format_exception(e)))
+    except Exception as ex:
+        print(ex)
+        pass
+    print(f'{type(e).__name__}: {e}')
+    return render_template('error.html', error_title=type(e).__name__, error_msg=f'{e}')
 
 
 def scale(array):

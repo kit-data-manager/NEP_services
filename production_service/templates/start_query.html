@@ -256,7 +256,6 @@
                             .join("&");
 
                         window.location.href = "/execute_query?query=" + selected.get()[0].id + "&" + params;
-                        $.redirect("", args, "POST");
                     });
 
                     $("#clear_query").bind("click", (event) => {

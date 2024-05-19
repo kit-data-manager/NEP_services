@@ -10,3 +10,4 @@ Flask-Session
 apscheduler
 python-dotenv
 gunicorn
+rdflib
