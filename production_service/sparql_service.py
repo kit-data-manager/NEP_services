@@ -12,9 +12,9 @@ class SPARQLService:
         #self.endpoint = endpoint_config
         # Load your Turtle file
         g = rdflib.Graph()
-        g.parse("../testing/FDO-Graph.ttl", format="turtle")
+        g.parse("../testing/example_FDO_Graph/FDO-Graph.ttl", format="turtle")
         self.endpoint = g
- 
+
     def execute_query(self, query):
         """
         Executes a SPARQL query.
