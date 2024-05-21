@@ -12,7 +12,7 @@ class SPARQLService:
         #self.endpoint = endpoint_config
         # Load your Turtle file
         g = rdflib.Graph()
-        g.parse("./FDO-NMR_Graph_1_2.ttl", format="turtle")
+        g.parse("../testing/FDO-Graph.ttl", format="turtle")
         self.endpoint = g
  
     def execute_query(self, query):
