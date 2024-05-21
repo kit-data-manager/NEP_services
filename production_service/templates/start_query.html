@@ -185,21 +185,57 @@
                 <div>
                     <div>
                         <!-- Group for record attribute and value -->
-                        <div class="search-fields" style="margin-bottom: 15px;">
+                        <div class="search-fields" style="margin-bottom: 15px;"
+                            sparql='
+                            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                            PREFIX fdoo: <https://datamanager.kit.edu/FDO-Graph#>
+                     
+                            SELECT ?attribute_np ?attributeValue_np ?pid
+                            WHERE {
+                            fdoo:%%record_attribute%% fdoo:hasValue ?attributeValue.
+                            FILTER regex(str(?attributeValue),  "%%attribute_value%%", "i")
+                            BIND(REPLACE(STR(?attributeValue), "https://datamanager.kit.edu/FDO-Graph#", "") AS ?attributeValue_np)
+                            ?attributeValue fdoo:isValueFor ?fdo.
+                            ?fdo rdfs:label ?pid.
+                            ?attributeValue fdoo:hasKey ?attribute.
+                            BIND(REPLACE(STR(?attribute), "https://datamanager.kit.edu/FDO-Graph#", "") AS ?attribute_np)
+                            }
+                            '>
                             <p>Query for a particular attribute and regex of a value that occur in an information record to
                                 display all matching attribute values and the corresponding PID of the FDO.</p>
                             <input type="radio" value="1" name="search_type" id="query_attribute" />
                             <input type="text" name="record_attribute" id="record_attribute" class="search-field"
-                                placeholder="Record Attribute">
+                                placeholder="Record Attribute" style="width: 207px;">
                             <input type="text" name="attribute_value" id="attribute_value" class="search-field"
-                                placeholder="Attribute Value">
+                                placeholder="Attribute Value" style="width: 208px;">
                         </div>
                         <!-- Group for PID -->
-                        <div class="search-fields">
+                        <div class="search-fields"
+                            sparql='
+                            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                            PREFIX fdoo: <https://datamanager.kit.edu/FDO-Graph#>
+                     
+                            SELECT ?attribute_np ?attributeValue_np ?pid
+                            WHERE {
+                            ?fdo rdfs:label "%%pid%%" .
+                            ?fdo fdoo:hasAttributeValue ?attributeValue.
+                            ?attributeValue fdoo:hasKey ?attribute.
+                            ?fdo rdfs:label ?pid.
+                            BIND(REPLACE(STR(?attributeValue), "https://datamanager.kit.edu/FDO-Graph#", "") AS ?attributeValue_np)
+                            BIND(REPLACE(STR(?attribute), "https://datamanager.kit.edu/FDO-Graph#", "") AS ?attribute_np)
+                            }
+                            '>
                             <p>Query for a particular PID of a FDO to display all attributes and their values of its
                                 information record.</p>
                             <input type="radio" value="1" name="search_type" id="query_pid" />
-                            <input type="text" name="pid" id="pid" class="search-field" placeholder="PID">
+                            <input type="text" name="pid" id="pid" class="search-field" placeholder="PID" style="width: 420px;">
+                        </div>
+                        <!-- Group raw queries -->
+                        <div class="search-fields"
+                            sparql="%%sparql%%">
+                            <p>Query using raw sparql syntax.</p>
+                            <input type="radio" value="1" name="search_type" id="query_sparql" style="vertical-align: top;" />
+                            <textarea rows="10" cols="60" name="sparql" id="sparql" class="search-field" placeholder="sparql query"></textarea>
                         </div>
                     </div>
                     <button id="submit_query" style="margin-top: 10px;">Execute Query</button>
@@ -222,12 +258,12 @@
                     }
                     active.prop("checked", true);
                     active.prop("disabled", true);
-                    active.siblings().filter("input").prop("disabled", false);
+                    active.siblings().filter("input,textarea").prop("disabled", false);
                     var others = all.filter((_, e) => e.id != active.get()[0].id);
                     others.prop("checked", false);
                     others.prop("disabled", false);
-                    others.siblings().filter("input").prop("disabled", true);
-                    all.siblings().filter("input").each((_, e) => {
+                    others.siblings().filter("input,textarea").prop("disabled", true);
+                    all.siblings().filter("input,textarea").each((_, e) => {
                         e.value = params.get(e.id, "");
                     });
                     $("input:radio[name='search_type']").on('click', function() {
@@ -236,25 +272,32 @@
                             var all = $("input:radio[name='search_type']")
                             all.prop("checked", false);
                             all.prop("disabled", false);
-                            all.siblings().filter("input").prop("disabled", true);
+                            all.siblings().filter("input,textarea").prop("disabled", true);
                             $box.prop("checked", true);
                             $box.prop("disabled", true);
-                            $box.siblings().filter("input").prop("disabled", false);
+                            $box.siblings().filter("input,textarea").prop("disabled", false);
                         } else {
                             $box.prop("checked", false);
                             $box.prop("disabled", false);
-                            $box.siblings().filter("input").prop("disabled", true);
+                            $box.siblings().filter("input,textarea").prop("disabled", true);
                         }
                     });
 
                     $("#submit_query").bind("click", (event) => {
                         var all = $("input:radio[name='search_type']");
                         var selected = all.filter(":disabled").first();
-                        var params = all.siblings().filter('input')
+                        var params = all.siblings().filter("input,textarea")
                             .map((_, v) => v.name + "=" + v.value)
                             .get()
                             .join("&");
-
+                        
+                        if (params.length > 0) params += "&";
+                        var sparql = selected.parent().attr("sparql");
+                        selected.siblings().filter("input,textarea")
+                            .map((_, v) => {
+                                sparql = sparql.replace("%%" + v.name + "%%", v.value);
+                            });
+                        params += "sparql_request=" + encodeURIComponent(sparql);
                         window.location.href = "/execute_query?query=" + selected.get()[0].id + "&" + params;
                     });
 

@@ -19,6 +19,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import shutil
 from dotenv import load_dotenv
 from werkzeug.exceptions import HTTPException
+from urllib.parse import unquote_plus
 
 load_dotenv() # This loads the variables from .env into the environment
 app = Flask(__name__)
@@ -105,72 +106,36 @@ def execute_query():
     :return: The rendered template or a redirect.
     """
 
-    attribute = request.args.get('record_attribute')
-    value = request.args.get('attribute_value')
-    pid = request.args.get('pid')
-    query = request.args.get('query')
-    if query == 'query_attribute':
-        sparql_query = sparql_service.construct_query_1(attribute, value)
-        # Execute SPARQL query and get PIDs
-        query_result = sparql_service.execute_query(sparql_query)
-        # Extract 'attributeValue_np' and 'pid' from the results
-        print(query_result)
-        results_list = [
-            {
-                'attributeValue_np': result['attributeValue_np'].value,
-                'pid': result['pid'].value
-            }
-            for result in query_result
-        ]
-        user_id = session['keycloak_token_nmr_graph'] if 'keycloak_token_nmr_graph' in session else ''.join(random.choice('0123456789abcdef') for n in range(5))
-        path = os.path.join(os.getcwd(), "temporary/")
-        path = os.path.join(path, user_id[:5])
-        # Check if the directory already exists to avoid an error
-        if not os.path.exists(path):
-            os.makedirs(path)
-            print(f"Directory '{user_id[:5]}' created at '{path}'.")
-        else:
-            print(f"Directory '{user_id[:5]}' already exists at '{path}'.")
+    sparql_request = unquote_plus(request.args.get('sparql_request'))
 
-        path = os.path.join(path, 'attribute_list.json')
+    # Execute SPARQL query and get PIDs
+    query_result = sparql_service.execute_query(sparql_request)
+    # Extract 'attributeValue_np' and 'pid' from the results
+    results_list = [
+        {
+            'attribute': result['attribute_np'].value,
+            'attributeValue': result['attributeValue_np'].value,
+            'pid': result['pid'].value
+        }
+        for result in query_result
+    ]
+    user_id = session['keycloak_token_nmr_graph'] if 'keycloak_token_nmr_graph' in session else ''.join(random.choice('0123456789abcdef') for n in range(5))
+    path = os.path.join(os.getcwd(), "temporary/")
+    path = os.path.join(path, user_id[:5])
+    # Check if the directory already exists to avoid an error
+    if not os.path.exists(path):
+        os.makedirs(path)
+        print(f"Directory '{user_id[:5]}' created at '{path}'.")
+    else:
+        print(f"Directory '{user_id[:5]}' already exists at '{path}'.")
 
-        with open(path, 'w') as file:
-            json.dump(results_list, file)
+    path = os.path.join(path, 'data.json')
 
-        session['attribute'] = attribute
-        session['attribute_search_results'] = path
-        return redirect(url_for('render_results_nmr_graph', request_type="attribute_and_value", **request.args))
-    elif query == 'query_pid':
-        sparql_query = sparql_service.construct_query_2(pid)
-        # Execute SPARQL query and get PIDs
-        query_result = sparql_service.execute_query(sparql_query)
-        # Extract 'attributeValue_np' and 'pid' from the results
-        results_list = [
-            {
-                'attribute': result['attribute_np'].value,
-                'attributeValue_np': result['attributeValue_np'].value
-            }
-            for result in query_result
-        ]
-        user_id = session['keycloak_token_nmr_graph'] if 'keycloak_token_nmr_graph' in session else ''.join(random.choice('0123456789abcdef') for n in range(5))
-        path = os.path.join(os.getcwd(), "temporary/")
-        path = os.path.join(path, user_id[:5])
-        # Check if the directory already exists to avoid an error
-        if not os.path.exists(path):
-            os.makedirs(path)
-            print(f"Directory '{user_id[:5]}' created at '{path}'.")
-        else:
-            print(f"Directory '{user_id[:5]}' already exists at '{path}'.")
+    with open(path, 'w') as file:
+        json.dump(results_list, file)
 
-        path = os.path.join(path, 'pidlist.json')
-
-        with open(path, 'w') as file:
-            json.dump(results_list, file)
-
-        session['pid'] = pid
-        session['fdo_search_results'] = path
-        return redirect(url_for('render_results_nmr_graph', request_type="pid", **request.args))
-    return redirect(url_for('start_query', **request.args))
+    session['fdo_search_results'] = path
+    return redirect(url_for('render_results_nmr_graph', **request.args))
 
 @app.route('/')
 def index():
@@ -190,32 +155,19 @@ def render_results_nmr_graph():
 
     :return: A redirect.
     """
-    request_type=request.args.get('request_type', default=None)
 
     args = { **request.args }
-    if request_type:
-        del args['request_type']
+    del args['sparql_request']
     query_request_url = url_for('start_query', **args)
     
-    if request_type=="pid":
-        pid = session.get('pid')
-        fdo_search_results_dir = session.get('fdo_search_results')
-        with open(fdo_search_results_dir, 'r') as file:
-            fdo_search_results = json.load(file)
-        if fdo_search_results is None:
-            print("no results found")
-            return render_template('error.html')
-        return render_template('results_pids.html', pid=pid, results=fdo_search_results, query_request_url=query_request_url)
-    if request_type=="attribute_and_value":
-        attribute = session.get('attribute')
-        attribute_search_results_dir = session.get('attribute_search_results')
-        with open(attribute_search_results_dir, 'r') as file:
-            attribute_search_results = json.load(file)
-        if attribute_search_results is None:
-            print("no results found")
-            return render_template('error.html')
-        return render_template('results_attributes_values.html', attribute=attribute, results=attribute_search_results, query_request_url=query_request_url)
-    return abort(400, f'Invalid request type `{request_type}`')
+    fdo_search_results_dir = session.get('fdo_search_results')
+    if fdo_search_results_dir is None:
+        abort(400, "no results found")
+    with open(fdo_search_results_dir, 'r') as file:
+        fdo_search_results = json.load(file)
+    if fdo_search_results is None:
+        abort(400, "no results found")
+    return render_template('results.html', results=fdo_search_results, query_request_url=query_request_url)
 
 @app.route('/render_results_mri_pred')
 def render_results_mri_pred():
