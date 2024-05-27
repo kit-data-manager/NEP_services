@@ -229,8 +229,8 @@
         <div class="ui segment" style='height:80vh'>
             <a class="ui blue ribbon label">Results</a>
             <div id="table-metadata"></div>
-            <h2>Query Results</h2>
-            <div class="scrollable-table">
+            <h2>Query Results |<a href={{ url_for("start_query", **args) }} class="back-button" style="padding-left: 20px;">New Query</a></h2>
+            <div class="scrollable-table" style="height: 83%">
                 <table>
                     <thead>
                         <tr>
@@ -242,15 +242,14 @@
                     <tbody>
                         {% for result in results %}
                         <tr>
-                            <td>{{ result.attribute }}</td>
-                            <td>{{ result.attributeValue }}</td>
-                            <td>{{ result.pid }}</td>
+                            <td><a href={{ url_for("start_query", auto=1, query="query_attribute", record_attribute=result.attribute, **copy_dict(args, [ "record_attribute", "attribute_value", "query" ])) }}>{{ result.attribute }}</a></td>
+                            <td><a href={{ url_for("start_query", auto=1, query="query_attribute", attribute_value=result.attributeValue, **copy_dict(args, [ "record_attribute", "attribute_value", "query" ])) }}>{{ result.attributeValue }}</a></td>
+                            <td><a href={{ url_for("start_query", auto=1, query="query_pid", pid=result.pid, **copy_dict(args, [ "pid", "query" ]))}}>{{ result.pid }}</a></td>
                         </tr>
                         {% endfor %}
                     </tbody>
                     <!-- Back Button -->
                     <br>
-                    <a href={{ query_request_url }} class="back-button" style="padding-left: 20px;">Request a new query</a>
                 </table>
             </div>
         </div>

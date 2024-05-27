@@ -283,7 +283,7 @@
                         }
                     });
 
-                    $("#submit_query").bind("click", (event) => {
+                    let send = (event) => {
                         var all = $("input:radio[name='search_type']");
                         var selected = all.filter(":disabled").first();
                         var params = all.siblings().filter("input,textarea")
@@ -299,11 +299,17 @@
                             });
                         params += "sparql_request=" + encodeURIComponent(sparql);
                         window.location.href = "/execute_query?query=" + selected.get()[0].id + "&" + params;
-                    });
+                    };
+                    $("#submit_query").bind("click", send);
 
                     $("#clear_query").bind("click", (event) => {
                         window.location.href = "/start_query";
-                    })
+                    });
+                    
+                    let searchParams = new URLSearchParams(window.location.search);
+                    if (searchParams.has('auto')) {
+                        send(undefined);
+                    }
                 </script>
 
                 <div class="documentation">

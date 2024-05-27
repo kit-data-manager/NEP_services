@@ -24,6 +24,13 @@ from urllib.parse import unquote_plus
 load_dotenv() # This loads the variables from .env into the environment
 app = Flask(__name__)
 
+def copy_dict(d: dict, blacklist: set):
+    return {k: v for k, v in d.items() if k not in blacklist}
+
+@app.context_processor
+def inject_stage_and_region():
+    return { 'copy_dict': copy_dict }
+
 current_dir = os.path.dirname(__file__)
 
 #app.secret_key = os.environ.get('SECRET_KEY', 'default-secret-key-for-development-only')
@@ -155,11 +162,9 @@ def render_results_nmr_graph():
 
     :return: A redirect.
     """
-
     args = { **request.args }
     del args['sparql_request']
-    query_request_url = url_for('start_query', **args)
-    
+
     fdo_search_results_dir = session.get('fdo_search_results')
     if fdo_search_results_dir is None:
         abort(400, "no results found")
@@ -167,7 +172,7 @@ def render_results_nmr_graph():
         fdo_search_results = json.load(file)
     if fdo_search_results is None:
         abort(400, "no results found")
-    return render_template('results.html', results=fdo_search_results, query_request_url=query_request_url)
+    return render_template('results.html', results=fdo_search_results, args=args)
 
 @app.route('/render_results_mri_pred')
 def render_results_mri_pred():
