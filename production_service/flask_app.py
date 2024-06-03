@@ -1,6 +1,7 @@
+import io
 from dotenv import load_dotenv
 load_dotenv() # This loads the variables from .env into the environment
-from flask import Flask, abort, render_template, request, send_file, send_from_directory, redirect, session, jsonify, url_for
+from flask import Flask, abort, make_response, render_template, request, send_file, send_from_directory, redirect, session, jsonify, url_for
 import random
 import os
 from sparql_service import SPARQLService
@@ -236,35 +237,30 @@ def prediction():
             prediction_image = Image.fromarray(prediction.squeeze().numpy())
             orig_image = Image.fromarray(image_tensor_normalized.squeeze().numpy())
 
-            user_id = session['keycloak_token_nmr_pred'] if 'keycloak_token_nmr_pred' in session else ''.join(random.choice('0123456789abcdef') for n in range(5))
+            with io.BytesIO() as buffer:
+                ds.save_as(buffer)
+                buffer.seek(0)
+                dicom = buffer.getvalue()
+                dicom_id = ''.join(random.choice('0123456789abcdef') for _ in range(32)) + '.dcm'
+                redis_db.set(dicom_id, dicom, ex=REDIS_EXPIRIY_TIME_SECONDS)
+            
+            with io.BytesIO() as buffer:
+                plt.imsave(buffer, prediction_image, cmap='gray')
+                buffer.seek(0)
+                pred = buffer.getvalue()
+                pred_id = ''.join(random.choice('0123456789abcdef') for _ in range(32)) + '.png'
+                redis_db.set(pred_id, pred, ex=REDIS_EXPIRIY_TIME_SECONDS)
+            
+            with io.BytesIO() as buffer:
+                plt.imsave(buffer, orig_image, cmap='gray')
+                buffer.seek(0)
+                orig = buffer.getvalue()
+                orig_id = ''.join(random.choice('0123456789abcdef') for _ in range(32)) + '.png'
+                redis_db.set(orig_id, orig, ex=REDIS_EXPIRIY_TIME_SECONDS)
 
-            path = os.path.join(os.getcwd(), "temporary/")
-            path = os.path.join(path, user_id[:5])
-
-            # Check if the directory already exists to avoid an error
-            if not os.path.exists(path):
-                os.makedirs(path)
-                print(f"Directory '{user_id[:5]}' created at '{path}'.")
-            else:
-                print(f"Directory '{user_id[:5]}' already exists at '{path}'.")
-
-            temp_directory = path
-            session['temp_directory'] = temp_directory
-
-            # Save the DICOM byte string to a temporary file
-            temp_dicom_file_path = os.path.join(temp_directory, "temporary_file.dcm")
-            ds.save_as(temp_dicom_file_path)
-
-            # Save the PNG image to a temporary file
-            temp_file_path_orig = os.path.join(temp_directory, "temporary_file_orig.png")
-            temp_file_path_pred = os.path.join(temp_directory, "temporary_file_pred.png")
-
-            plt.imsave(temp_file_path_pred, prediction_image, cmap='gray')
-            plt.imsave(temp_file_path_orig, orig_image, cmap='gray')
-
-            dicom_data_url = url_for('serve_temp_file', filename=os.path.basename(temp_dicom_file_path))
-            prediction_image_url = url_for('serve_image', filename=os.path.basename(temp_file_path_pred))
-            orig_image_url = url_for('serve_image', filename=os.path.basename(temp_file_path_orig))
+            dicom_data_url = url_for('serve_temp_file', filename=dicom_id)
+            prediction_image_url = url_for('serve_image', filename=pred_id)
+            orig_image_url = url_for('serve_image', filename=orig_id)
 
             session['dicom_data_url'] = dicom_data_url
             session['prediction_image_url'] = prediction_image_url
@@ -292,18 +288,22 @@ def download_dicom():
 @app.route('/image/<filename>')
 #@token_required_mri_pred
 def serve_image(filename):
-    token = session['keycloak_token_mri_pred']
-    monitoring(token)
-    temp_directory = session['temp_directory']
-    return send_from_directory(temp_directory, filename)
+    image_binary = redis_db.get(filename)
+    response = make_response(image_binary)
+    response.headers.set('Content-Type', 'image/png')
+    response.headers.set(
+        'Content-Disposition', 'attachment', filename=filename)
+    return response
 
 @app.route('/temp-files/<filename>')
 #@token_required_mri_pred
 def serve_temp_file(filename):
-    token = session['keycloak_token_mri_pred']
-    monitoring(token)
-    temp_directory = session['temp_directory']
-    return send_from_directory(temp_directory, filename)
+    image_binary = redis_db.get(filename)
+    response = make_response(image_binary)
+    response.headers.set('Content-Type', 'text/plain')
+    response.headers.set(
+        'Content-Disposition', 'attachment', filename=filename)
+    return response
 
 @app.errorhandler(Exception)
 def handle_exception(e):
