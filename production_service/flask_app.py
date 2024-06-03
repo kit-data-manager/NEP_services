@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, send_file, send_from_directory, redirect, session, jsonify, url_for
+from dotenv import load_dotenv
+load_dotenv() # This loads the variables from .env into the environment
+from flask import Flask, abort, render_template, request, send_file, send_from_directory, redirect, session, jsonify, url_for
 import random
 import os
 from sparql_service import SPARQLService
@@ -15,14 +17,16 @@ from model import build_unet
 import time
 import requests
 import json
-from apscheduler.schedulers.background import BackgroundScheduler
 import shutil
-from dotenv import load_dotenv
 from werkzeug.exceptions import HTTPException
 from urllib.parse import unquote_plus
+import redis
 
-load_dotenv() # This loads the variables from .env into the environment
-app = Flask(__name__)
+REDIS_EXPIRIY_TIME_SECONDS = 60 * 30
+
+redis_db = redis.Redis(host='localhost', port=6379, decode_responses=True)
+
+app = Flask(__name__, template_folder = os.getcwd() + '/templates', static_folder = os.getcwd() + '/static')
 
 def copy_dict(d: dict, blacklist: set):
     return {k: v for k, v in d.items() if k not in blacklist}
@@ -34,48 +38,10 @@ def inject_stage_and_region():
 current_dir = os.path.dirname(__file__)
 
 #app.secret_key = os.environ.get('SECRET_KEY', 'default-secret-key-for-development-only')
-app.secret_key = os.environ.get('SECRET_KEY')
+app.secret_key = os.environ.get('SECRET_KEY', "something_unique_and_secret")
 sparql_service = sparql_service = SPARQLService()
 
-def delete_old_images():
-    folder = os.path.join(os.getcwd(), "temporary/")
-    now = time.time()
-    old_age = 50
-
-    for root, dirs, files in os.walk(folder, topdown=False):
-        # Check if all files in the directory are older than the age limit
-        all_files_old = True if files else False  # Assume True if there are files, False if directory is empty
-        
-        for name in files:
-            file_path = os.path.join(root, name)
-            file_age = now - os.path.getmtime(file_path)
-            if file_age > old_age:
-                os.remove(file_path)
-                print(f"Deleted file: {file_path}")
-            else:
-                all_files_old = False  # There's at least one file newer than the age limit
-        
-        # Now handle directories, excluding the root 'images' folder itself from deletion
-        if root != folder and all_files_old and dirs == []:  # Only proceed if it's not the 'images' folder itself, all files are old, and there are no subdirectories
-            try:
-                shutil.rmtree(root)
-                print(f"Deleted directory with all old files: {root}")
-            except OSError as e:
-                print(f"Error: {root} : {e.strerror}")
-        elif root != folder and dirs == []:  # Check if directory is empty and not the 'images' folder itself
-            try:
-                os.rmdir(root)
-                print(f"Deleted empty directory: {root}")
-            except OSError as e:
-                print(f"Error: {root} : {e.strerror}")
-
-# Initialize Scheduler
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=delete_old_images, trigger="interval", hours=1)
-scheduler.start()
-
 def monitoring(token):
-    return
     url = 'https://be.nffa.eu/api/v2/monitoring/access/'
     # Headers as a dictionary
     headers = {
@@ -126,22 +92,13 @@ def execute_query():
         }
         for result in query_result
     ]
-    user_id = session['keycloak_token_nmr_graph'] if 'keycloak_token_nmr_graph' in session else ''.join(random.choice('0123456789abcdef') for n in range(5))
-    path = os.path.join(os.getcwd(), "temporary/")
-    path = os.path.join(path, user_id[:5])
-    # Check if the directory already exists to avoid an error
-    if not os.path.exists(path):
-        os.makedirs(path)
-        print(f"Directory '{user_id[:5]}' created at '{path}'.")
-    else:
-        print(f"Directory '{user_id[:5]}' already exists at '{path}'.")
 
-    path = os.path.join(path, 'data.json')
+    data_id = ''.join(random.choice('0123456789abcdef') for _ in range(32))
+    redis_db.set(data_id, json.dumps(results_list), ex=REDIS_EXPIRIY_TIME_SECONDS)
 
-    with open(path, 'w') as file:
-        json.dump(results_list, file)
+    print(f'registered for id {data_id}: {json.dumps(results_list)}')
 
-    session['fdo_search_results'] = path
+    session['fdo_search_results'] = data_id
     return redirect(url_for('render_results_nmr_graph', **request.args))
 
 @app.route('/')
@@ -165,11 +122,11 @@ def render_results_nmr_graph():
     args = { **request.args }
     del args['sparql_request']
 
-    fdo_search_results_dir = session.get('fdo_search_results')
-    if fdo_search_results_dir is None:
+    data_id = session.get('fdo_search_results')
+    if data_id is None:
         abort(400, "no results found")
-    with open(fdo_search_results_dir, 'r') as file:
-        fdo_search_results = json.load(file)
+
+    fdo_search_results = json.loads(redis_db.get(data_id))
     if fdo_search_results is None:
         abort(400, "no results found")
     return render_template('results.html', results=fdo_search_results, args=args)

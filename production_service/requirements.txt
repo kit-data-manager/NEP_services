@@ -11,3 +11,4 @@ apscheduler
 python-dotenv
 gunicorn
 rdflib
+redis
