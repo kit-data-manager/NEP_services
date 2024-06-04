@@ -308,7 +308,7 @@ def serve_temp_file(filename):
 @app.errorhandler(Exception)
 def handle_exception(e):
     if isinstance(e, HTTPException):
-        print(f'{e.code}: {e.name} {e.description}')
+        print(f'{e.code}: {e.name} {e.description}: {request.url}')
         return render_template('error.html', error_code=e.code, error_title=e.name, error_msg=e.description)
     try:
         import traceback
