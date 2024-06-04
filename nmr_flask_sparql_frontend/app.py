@@ -76,7 +76,7 @@ def authenticate():
 def authenticate_return():
     redirect_url = urllib.parse.unquote(request.args.get('redirect', DEFAULT_PATH))
     if get_and_validate_keycloak():
-        return redirect(auth_url)
+        return redirect(redirect_url)
     code = request.args.get('code')
     if not code:
         abort(400, 'Missing parameters')
