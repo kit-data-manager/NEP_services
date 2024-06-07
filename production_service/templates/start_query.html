@@ -179,7 +179,7 @@
                 <h2>Submit Your Query</h2>
                 <!-- Explanatory text for the two options -->
                 <p>This graphical user interface enables one to search for NMR data resources across data bases (currenlty
-                    NMRXiV - <a href="https://nmrxiv.org/">nmrxiv.org</a> and BMRB - <a href="https://bmrb.io/">bmrb.io</a>). Each data resource has been represented
+                    NMRXiV - <a href="https://nmrxiv.org/">nmrxiv.org</a>, <a href="https://pubchem.ncbi.nlm.nih.gov/">pubchem.ncbi.nlm.nih.gov</a> and BMRB - <a href="https://bmrb.io/">bmrb.io</a>). Each data resource has been represented
                     as a FAIR Digital NMR Object (FDO) that has a unique Persistent IDentifier (PID) and a set of
                     metadata to easily identfiy and characterize an NMR resource. </p>
                 <div>
@@ -314,21 +314,20 @@
 
                 <div class="documentation">
                     <h3>Documentation</h3>
-                    <p>The following queries are enabled:</p>
+                    <p>The following queries are enabled to filter for the data resource:</p>
                     <ul>
-                        <li><b>To get a list of all PIDs in the graph database, insert <i>all</i> in the PID search
-                                field. </b> </li>
-                        <li><b>Filter for data resource license (URL): <i>licenseURL</i> </b> </li>
-                        <li><b>Filter for data resource contact information (email or ORCiD): <i>contact</i> </b> </li>
-                        <li><b>Filter for the data resource location attributes (URL): <i>digitalObjectLocation</i> or
+                        <li><b>Compound name: <i>name</i> </b> </li>
+                        <li><b>Compound chemical formula: <i>chemicalFormula</i> </b> </li>
+                        <li><b>Medical image modality: <i>MedicalImageModality</i> </b> </li>
+                        <li><b>License: <i>licenseURL</i> </b> </li>
+                        <li><b>Contact information (email or ORCiD): <i>contact</i> or <i>emailContact</i> </b> </li>
+                        <li><b>Location attributes: <i>digitalObjectLocation</i> or
                                 <i>landingPageLocation</i> </b> </li>
-                        <li><b>Filter for date information attributes (YYYY-MM-DDThh:mm:ss.ssssssZ): <i>dateCreated</i>
+                        <li><b>Date information attributes: <i>dateCreated</i>
                                 or <i>dateModified</i></b> </li>
-                        <li><b>Filter for date information attributes (YYYY-MM-DDThh:mm:ss.ssssssZ): <i>dateCreated</i>
-                                or <i>dateModified</i></b> </li>
-                        <li><b>Filter for data base internal IDs (P_id and S_id): <i>projectIdentifier</i> or
-                                <i>sampleIdentifier</i></b> </li>
-                        <li><b>Filter for data resource format (Media-types): <i>containerMedia-type-IANA</i> or
+                        <li><b>Data base internal IDs (P_id and S_id): <i>projectIdentifier</i>(NMRxiv),
+                                <i>sampleIdentifier</i>(NMRxiv) or <i>identifier</i></b> </li>
+                        <li><b>Data format (Media-types): <i>containerizedMedia-type-IANA</i> or
                                 <i>media-type-IANA </i></b> </li>
                     </ul>
                 </div>
