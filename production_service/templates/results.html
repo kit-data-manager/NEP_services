@@ -243,7 +243,7 @@
                         {% for result in results %}
                         <tr>
                             <td><a href={{ url_for("start_query", auto=1, query="query_attribute", record_attribute=result.attribute, **copy_dict(args, [ "record_attribute", "attribute_value", "query" ])) }}>{{ result.attribute }}</a></td>
-                            <td><a href={{ url_for("start_query", auto=1, query="query_attribute", attribute_value=result.attributeValue, **copy_dict(args, [ "record_attribute", "attribute_value", "query" ])) }}>{{ result.attributeValue }}</a></td>
+                            <td><a href={{ url_for("start_query", auto=1, query="query_attribute", record_attribute=result.attribute, attribute_value=result.attributeValue, **copy_dict(args, [ "record_attribute", "attribute_value", "query" ])) }}>{{ result.attributeValue }}</a></td>
                             <td><a href={{ url_for("start_query", auto=1, query="query_pid", pid=result.pid, **copy_dict(args, [ "pid", "query" ]))}}>{{ result.pid }}</a></td>
                         </tr>
                         {% endfor %}

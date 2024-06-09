@@ -22,6 +22,8 @@ import shutil
 from werkzeug.exceptions import HTTPException
 from urllib.parse import unquote_plus
 import redis
+import gzip
+import base64
 
 REDIS_EXPIRIY_TIME_SECONDS = 60 * 30
 
@@ -80,7 +82,14 @@ def execute_query():
     :return: The rendered template or a redirect.
     """
 
-    sparql_request = unquote_plus(request.args.get('sparql_request'))
+    args = {**request.args}
+    if 'zdata' in args:
+        zdata = args['zdata']
+        bin_data = base64.b64decode(zdata.replace(' ', '+'))
+        str_data = gzip.decompress(bin_data)
+        args = json.loads(str_data)
+
+    sparql_request = args.get('sparql_request')
 
     # Execute SPARQL query and get PIDs
     query_result = sparql_service.execute_query(sparql_request)
@@ -100,7 +109,8 @@ def execute_query():
     print(f'registered for id {data_id}: {json.dumps(results_list)}')
 
     session['fdo_search_results'] = data_id
-    return redirect(url_for('render_results_nmr_graph', **request.args))
+    del args['sparql_request']
+    return redirect(url_for('render_results_nmr_graph', **args))
 
 @app.route('/')
 def index():
@@ -121,7 +131,6 @@ def render_results_nmr_graph():
     :return: A redirect.
     """
     args = { **request.args }
-    del args['sparql_request']
 
     data_id = session.get('fdo_search_results')
     if data_id is None:
