@@ -134,7 +134,7 @@ def render_results_nmr_graph():
 
     data_id = session.get('fdo_search_results')
     if data_id is None:
-        return redirect(url_for('start_query', **args))
+        return redirect(url_for('start_query', **args, auto=1))
 
     fdo_search_results_json = redis_db.get(data_id)
     if fdo_search_results_json is None:
