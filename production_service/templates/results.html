@@ -229,8 +229,8 @@
         <div class="ui segment" style='height:80vh'>
             <a class="ui blue ribbon label">Results</a>
             <div id="table-metadata"></div>
-            <h2>Query Results |<a href={{ url_for("start_query", **args) }} class="back-button" style="padding-left: 20px;">New Query</a></h2>
-            <div class="scrollable-table" style="height: 83%">
+            <h2 style="padding-left: 10px;">Query Result: {{ results|length }} entries |<a href={{ url_for("start_query", **args) }} class="back-button" style="padding-left: 5px;">New Query</a></h2>
+            <div class="scrollable-table" style="height: 82%">
                 <table>
                     <thead>
                         <tr>
