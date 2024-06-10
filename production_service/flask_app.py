@@ -134,11 +134,13 @@ def render_results_nmr_graph():
 
     data_id = session.get('fdo_search_results')
     if data_id is None:
-        abort(400, "no results found")
+        return redirect(url_for('start_query', **args))
 
-    fdo_search_results = json.loads(redis_db.get(data_id))
-    if fdo_search_results is None:
-        abort(400, "no results found")
+    fdo_search_results_json = redis_db.get(data_id)
+    if fdo_search_results_json is None:
+        return redirect(url_for('start_query', **args, auto=1))
+    
+    fdo_search_results = json.loads(fdo_search_results_json)
     return render_template('results.html', results=fdo_search_results, args=args)
 
 @app.route('/render_results_mri_pred')
