@@ -251,21 +251,21 @@ def prediction():
             with io.BytesIO() as buffer:
                 ds.save_as(buffer)
                 buffer.seek(0)
-                dicom = buffer.getvalue()
+                dicom = base64.b64encode(buffer.getvalue())
                 dicom_id = ''.join(random.choice('0123456789abcdef') for _ in range(32)) + '.dcm'
                 redis_db.set(dicom_id, dicom, ex=REDIS_EXPIRIY_TIME_SECONDS)
             
             with io.BytesIO() as buffer:
                 plt.imsave(buffer, prediction_image, cmap='gray')
                 buffer.seek(0)
-                pred = buffer.getvalue()
+                pred = base64.b64encode(buffer.getvalue())
                 pred_id = ''.join(random.choice('0123456789abcdef') for _ in range(32)) + '.png'
                 redis_db.set(pred_id, pred, ex=REDIS_EXPIRIY_TIME_SECONDS)
             
             with io.BytesIO() as buffer:
                 plt.imsave(buffer, orig_image, cmap='gray')
                 buffer.seek(0)
-                orig = buffer.getvalue()
+                orig = base64.b64encode(buffer.getvalue())
                 orig_id = ''.join(random.choice('0123456789abcdef') for _ in range(32)) + '.png'
                 redis_db.set(orig_id, orig, ex=REDIS_EXPIRIY_TIME_SECONDS)
 
@@ -300,7 +300,7 @@ def download_dicom():
 #@token_required_mri_pred
 def serve_image(filename):
     image_binary = redis_db.get(filename)
-    response = make_response(image_binary)
+    response = make_response(base64.b64decode(image_binary))
     response.headers.set('Content-Type', 'image/png')
     response.headers.set(
         'Content-Disposition', 'attachment', filename=filename)
@@ -310,8 +310,8 @@ def serve_image(filename):
 #@token_required_mri_pred
 def serve_temp_file(filename):
     image_binary = redis_db.get(filename)
-    response = make_response(image_binary)
-    response.headers.set('Content-Type', 'text/plain')
+    response = make_response(base64.b64decode(image_binary))
+    response.headers.set('Content-Type', 'application/octet-stream')
     response.headers.set(
         'Content-Disposition', 'attachment', filename=filename)
     return response
