@@ -141,7 +141,7 @@ def render_results_nmr_graph():
         return redirect(url_for('start_query', **args, auto=1))
     
     fdo_search_results = json.loads(fdo_search_results_json)
-    return render_template('results.html', results=fdo_search_results, args=args)
+    return render_template('results.html', results=fdo_search_results, args=args, query=request.args['query'])
 
 @app.route('/render_results_mri_pred')
 def render_results_mri_pred():
@@ -151,6 +151,8 @@ def render_results_mri_pred():
     :return: A redirect.
     """
     args = { **request.args }
+    for key in args:
+        args[key] = args[key].strip()
     query_request_url = url_for('prediction', **args)
 
     dicom_data_url = session.get('dicom_data_url')

@@ -56,6 +56,16 @@
             width: 120px;
             height: auto;
         }
+
+        .selectable {
+            padding-inline: 5px; 
+            border-width: 2px; 
+            border-radius: 5px; 
+            border-style: solid;
+        }
+        .selectable:hover {
+            cursor: pointer;
+        }
     </style>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -127,6 +137,19 @@
     </div>
 </h1>
 
+<script>
+    $(document).ready(function() {
+        $(".selectable").on("click", event => {
+            var range = document.createRange();
+            var selection = window.getSelection();
+            range.selectNodeContents(event.target);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            navigator.clipboard.writeText(event.target.innerText);
+        });
+    });
+
+</script>
 
 <div class="ui grid container">
     <div class="ui secondary fluid menu">
@@ -230,26 +253,29 @@
             <a class="ui blue ribbon label">Results</a>
             <div id="table-metadata"></div>
             <h2 style="padding-left: 10px;">Query Result: {{ results|length }} entries |<a href={{ url_for("start_query", **args) }} class="back-button" style="padding-left: 5px;">New Query</a></h2>
-            <div class="scrollable-table" style="height: 82%">
-                <table>
+            <code style="margin-bottom: 0;">
+                {% if query == 'query_attribute' %} attribute = <span class="selectable"> {{ args['record_attribute'] }}</span>{% endif %}{% if query == 'query_attribute' and args['attribute_value'] %}; attribute_value = <span class="selectable"> {{ args['attribute_value'] }} </span> {% endif %}
+                {% if query == 'query_pid' %} pid = <span class="selectable"> {{ args['pid'] }} </span> {% endif %}
+            </code>
+            <div class="scrollable-table" style="height: 76%">
+                <table style="margin-top: 0;">
                     <thead>
                         <tr>
-                            <th>Attribute</th>
-                            <th>Attribute Value</th>
-                            <th>PID</th>
+                            {% if query != 'query_attribute' %} <th>Attribute</th> {% endif %}
+                            {% if query != 'query_attribute' or not args['attribute_value'] %} <th>Attribute Value</th> {% endif %}
+                            {% if query != 'query_pid' %} <th>PID</th> {% endif %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for result in results %}
                         <tr>
-                            <td><a href={{ url_for("start_query", auto=1, query="query_attribute", record_attribute=result.attribute, **copy_dict(args, [ "record_attribute", "attribute_value", "query" ])) }}>{{ result.attribute }}</a></td>
-                            <td><a href={{ url_for("start_query", auto=1, query="query_attribute", record_attribute=result.attribute, attribute_value=result.attributeValue, **copy_dict(args, [ "record_attribute", "attribute_value", "query" ])) }}>{{ result.attributeValue }}</a></td>
-                            <td><a href={{ url_for("start_query", auto=1, query="query_pid", pid=result.pid, **copy_dict(args, [ "pid", "query" ]))}}>{{ result.pid }}</a></td>
+                            {% if query != 'query_attribute' %} <td><a href={{ url_for("start_query", auto=1, query="query_attribute", record_attribute=result.attribute, **copy_dict(args, [ "record_attribute", "attribute_value", "query" ])) }}>{{ result.attribute }}</a></td> {% endif %}
+                            {% if query != 'query_attribute' or not args['attribute_value'] %} <td><a href={{ url_for("start_query", auto=1, query="query_attribute", record_attribute=result.attribute, attribute_value=result.attributeValue, **copy_dict(args, [ "record_attribute", "attribute_value", "query" ])) }}>{{ result.attributeValue }}</a></td> {% endif %}
+                            {% if query != 'query_pid' %} <td><a href={{ url_for("start_query", auto=1, query="query_pid", pid=result.pid, **copy_dict(args, [ "pid", "query" ]))}}>{{ result.pid }}</a></td> {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
                     <!-- Back Button -->
-                    <br>
                 </table>
             </div>
         </div>
