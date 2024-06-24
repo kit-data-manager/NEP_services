@@ -261,17 +261,17 @@
                 <table style="margin-top: 0;">
                     <thead>
                         <tr>
-                            {% if query != 'query_attribute' %} <th>Attribute</th> {% endif %}
-                            {% if query != 'query_attribute' or not args['attribute_value'] %} <th>Attribute Value</th> {% endif %}
-                            {% if query != 'query_pid' %} <th>PID</th> {% endif %}
+                            {% if query != 'query_attribute' %} <th style="width: 0;">Attribute</th> {% endif %}
+                            {% if query != 'query_attribute' or not args['attribute_value'] %} <th style="width: 0;">Attribute Value</th> {% endif %}
+                            {% if query != 'query_pid' %} <th style="width: 0;">PID</th> {% endif %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for result in results %}
                         <tr>
-                            {% if query != 'query_attribute' %} <td><a href={{ url_for("start_query", auto=1, query="query_attribute", record_attribute=result.attribute, **copy_dict(args, [ "record_attribute", "attribute_value", "query" ])) }}>{{ result.attribute }}</a></td> {% endif %}
-                            {% if query != 'query_attribute' or not args['attribute_value'] %} <td><a href={{ url_for("start_query", auto=1, query="query_attribute", record_attribute=result.attribute, attribute_value=result.attributeValue, **copy_dict(args, [ "record_attribute", "attribute_value", "query" ])) }}>{{ result.attributeValue }}</a></td> {% endif %}
-                            {% if query != 'query_pid' %} <td><a href={{ url_for("start_query", auto=1, query="query_pid", pid=result.pid, **copy_dict(args, [ "pid", "query" ]))}}>{{ result.pid }}</a></td> {% endif %}
+                            {% if query != 'query_attribute' %} <td><a href={{ url_for("start_query", auto=1, query="query_attribute", record_attribute=result.attribute, **copy_dict(args, [ "record_attribute", "attribute_value", "query" ])) }}><img src="./static/query.svg" style="width: 20px;"></a> {{ result.attribute }} </td> {% endif %}
+                            {% if query != 'query_attribute' or not args['attribute_value'] %} <td><a href={{ url_for("start_query", auto=1, query="query_attribute", record_attribute=result.attribute, attribute_value=result.attributeValue, **copy_dict(args, [ "record_attribute", "attribute_value", "query" ])) }}><img src="./static/query.svg" style="width: 20px;"></a> {{ result.attributeValue | urlize }} </td> {% endif %}
+                            {% if query != 'query_pid' %} <td><a href={{ url_for("start_query", auto=1, query="query_pid", pid=result.pid, **copy_dict(args, [ "pid", "query" ]))}}><img src="./static/query.svg" style="width: 20px;"></a> <a href="https://hdl.handle.net/{{ result.pid }}">{{ result.pid }}</a> </td> {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
