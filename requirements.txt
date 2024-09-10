@@ -1,0 +1,14 @@
+Flask
+requests
+numpy
+Pillow
+matplotlib
+torch
+torchvision
+pydicom
+Flask-Session
+apscheduler
+python-dotenv
+gunicorn
+rdflib
+redis

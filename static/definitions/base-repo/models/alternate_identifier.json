@@ -1,0 +1,60 @@
+{
+  "type": "object",
+  "headerTemplate": "{{self.identifierType}}",
+  "format": "grid-strict",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "readOnly": true,
+      "options": {
+        "hidden": true
+      }
+    },
+    "identifierType": {
+      "propertyOrder": 2,
+      "type": "string",
+      "title": "Identifier Type",
+      "enum": [
+        "ARK",
+        "AR_XIV",
+        "BIBCODE",
+        "DOI",
+        "EAN_13",
+        "EISSN",
+        "HANDLE",
+        "IGSN",
+        "ISBN",
+        "ISSN",
+        "ISTC",
+        "LISSN",
+        "LSID",
+        "PMID",
+        "PURL",
+        "UPC",
+        "URL",
+        "URN",
+        "W_3_ID",
+        "INTERNAL",
+        "OTHER"
+      ],
+      "default": "DOI",
+      "options": {
+        "grid_columns": 4,
+        "infoText": "The type of the alternate identifier."
+      }
+    },
+    "value": {
+      "type": "string",
+      "propertyOrder": 3,
+      "title": "Identifier",
+      "options": {
+        "grid_columns": 8,
+        "infoText": "The alternate identifier value."
+      }
+    }
+  },
+  "required": [
+    "identifierType",
+    "value"
+  ]
+}

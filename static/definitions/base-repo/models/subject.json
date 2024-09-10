@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "format": "grid-strict",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "options": {
+        "hidden": true
+      }
+    },
+    "value": {
+      "propertyOrder": 2,
+      "title": "Subject Value",
+      "type": "string",
+      "options": {
+        "grid_columns": 4,
+        "infoText": "The subject value, e.g., a human readable name."
+      }
+    },
+    "valueUri": {
+      "propertyOrder": 3,
+      "title": "Value URI",
+      "type": "string",
+      "options": {
+        "grid_columns": 6,
+        "infoText": "The subject value URI, e.g., a machine readable description."
+      }
+    },
+    "lang": {
+      "propertyOrder": 1,
+      "title": "Language",
+      "$ref": "language.json",
+      "options": {
+        "grid_columns": 2,
+        "infoText": "The subject language."
+      }
+    },
+    "scheme": {
+      "$ref": "scheme.json",
+      "options": {
+        "hidden": true
+      }
+    }
+  }
+}
