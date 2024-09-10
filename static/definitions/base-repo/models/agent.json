@@ -1,0 +1,50 @@
+{
+  "type": "object",
+  "format": "grid-strict",
+  "options": {
+    "disable_collapse": false,
+    "disable_edit_json": true,
+    "disable_properties": true,
+    "compact": false
+  },
+  "properties": {
+    "id": {
+      "type": "integer",
+      "options": {
+        "hidden": true
+      }
+    },
+    "givenName": {
+      "type": "string",
+      "title": "First Name",
+      "propertyOrder": 3,
+      "options": {
+        "grid_columns": 6,
+        "infoText": "The given name of the person."
+      }
+    },
+    "familyName": {
+      "type": "string",
+      "title": "Family Name",
+      "propertyOrder": 2,
+      "options": {
+        "grid_columns": 6,
+        "infoText": "The family name of the person."
+      }
+    },
+    "affiliations": {
+      "type": "array",
+      "title": "Affiliations",
+      "propertyOrder": 4,
+      "options": {
+        "collapsed": true,
+        "grid_columns": 12,
+        "infoText": "One or more affiliations of the person."
+      },
+      "items": {
+        "headerTemplate": "Affiliation #{{ i1 }} {{#if self }} ({{ self }}) {{else}} (None) {{/if}}",
+        "type": "string"
+      }
+    }
+  }
+}

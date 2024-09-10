@@ -1,0 +1,109 @@
+<!--html>
+<head>
+    <script src="../../js/semantic-ui/transition.min.js"></script>
+    <script src="../../js/semantic-ui/dimmer.min.js"></script>
+    <script src="../../js/semantic-ui/tab.min.js"></script>
+    <script src="../../js/semantic-ui/modal.min.js"></script>
+    <script src="../../js/semantic-ui/dropdown.min.js"></script>
+    <link rel="stylesheet" href="../../css/semantic.min.css">
+</head>
+<body class="ui"-->
+<div class="ui grid container">
+        <!--left side (details and content)-->
+        <div class="ten wide column">
+            <div class="ui padded grid">
+                <!--row-->
+                <!--div class="ui row">
+                    <div class="eleven wide column">
+                        <h3 class="ui header">{_source.metadata.titles.0.value}}</h3>
+                    </div>
+                    <div class="five wide right floated column">
+                     <span class="ui tiny fluid blue label">
+                         {_source.metadata.resourceType.typeGeneral}}<br/>
+                        <div class="detail">{_source.metadata.resourceType.value}}</div>
+            </span>
+                    </div>
+                </div-->
+                <!--row-->
+
+                    <div class="column">
+                        <div id="editor"></div>
+                    </div>
+                <!--row-->
+                <!--div class="ui row">
+                    <div class="column">
+                        {#if _source.metadata.descriptions.0.description}}
+                            <i>{_source.metadata.descriptions.0.description}}</i>
+                        {else}}
+                            <i>No description available</i>
+                        {/if}}
+                    </div>
+                </div-->
+                <!--row-->
+                <!--div class="ui row">
+                    <div class="column">
+                        <div class="ui segment">
+                            <a class="ui left corner label">
+                                <i class="file icon"></i>
+                            </a>
+                            {#if _source.content.0.relativePath}}
+                                {#each _source.content}}
+                                    <div class="ui fluid list" style="margin-left: 10px">
+                                        <div class="item">
+                                            <div class="content">
+                                                <div class="header"><a href='{contentLink this}}'
+                                                                       target='_blank'>{relativePath}}</a></div>
+                                                <div class="description">{hash}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {/each}}
+                            {else}}
+                                <i style="padding-left: 20px">No content uploaded, yet.</i>
+                            {/if}}
+                        </div>
+                    </div>
+                </div-->
+            </div>
+        </div>
+        <!--right side (metadata)-->
+        <div class="six wide column">
+            <div class="ui row">
+                <div class="ui flex-fill segment">
+                    <h3>Metadata</h3>
+                    <b>Schema:</b><br/>
+                    <span class="indent"><a href="{{_source.metadataRecord.schema.identifier}}">{{idFromUrl _source.metadataRecord.schema.identifier}} v{{_source.metadataRecord.schemaVersion}}</a></span><br/>
+                    <b>Hash:</b><br/>
+                    <span class="indent" style="font-size: xx-small">{{_source.metadataRecord.documentHash}}</span><br/>
+                    <b>Created at:</b><br/>
+                    <span class="indent">{{formatDate _source.created}}</span><br/>
+                    <b>Last Modified:</b><br/>
+                    <span class="indent">{{formatDate _source.lastUpdate}}</span><br/>
+
+                </div>
+            </div>
+            <!--row-->
+            <div class="ui row" style="margin-top: 20px">
+                <div class="ui flex-fill segment">
+                    <h3>Downloads</h3>
+                    <div id="download_json" class="ui label download">
+                        JSON
+                    </div>
+                </div>
+            </div>
+            <textarea id="text"  style="visibility:hidden" name="text">{{documentAsText _source.metadataDocument}}</textarea>
+        </div>
+</div>
+<script type="module">
+
+    main();
+
+    function main() {
+        var editor = ace.edit("editor");
+        editor.session.setMode("ace/mode/json");
+        editor.session.setTabSize(2);
+        editor.session.setUseWrapMode(true);
+        editor.session.setValue($("#text").val());
+    }
+
+</script>

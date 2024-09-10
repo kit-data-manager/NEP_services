@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #app-logo {
+            width: 120px;
+            height: auto;
+        }
+    </style>
+    {% if error_title and error_code %}
+        <title>{{ error_code }} : {{ error_title }}</title>
+    {% elif error_title %}
+        <title>500: {{ error_title }}</title>
+    {% elif error_code %}
+        <title>{{ error_code }} : Error</title>
+    {% else %}
+        <title>500: Error</title>
+    {% endif %}
+    <link rel="icon" type="image/x-icon" href="./static/images/favicon.ico" >
+
+</head>
+<body>
+    {% if error_title and error_code %}
+        <h1>{{ error_code }} : {{ error_title }}</h1>
+    {% elif error_title %}
+        <h1>500: {{ error_title }}</h1>
+    {% elif error_code %}
+        <h1>{{ error_code }} : Error</h1>
+    {% else %}
+        <h1>500: Error</h1>
+    {% endif %}
+    {% if error_msg %}
+        <div style="color: #BB0000; white-space: pre-wrap; padding-left: 30px;">
+{{ error_msg }}
+        </div>
+    {% endif %}
+
+   <!-- Back Button -->
+   <br>
+   <p>If this error persists, please contact us.</p>
+   <a href="/" class="back-button">Make a new prediction</a>
+</body>
+</html>

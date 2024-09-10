@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "format": "grid-strict",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "readOnly": true,
+      "options": {
+        "hidden": true
+      }
+    },
+    "type": {
+      "type": "string",
+      "enum": ["ACCEPTED", "AVAILABLE", "COLLECTED", "COPYRIGHTED", "CREATED", "ISSUED", "SUBMITTED", "UPDATED", "VALID", "REVOKED"],
+      "options": {
+        "grid_columns": 6,
+        "infoText": "The date type."
+
+      }
+    },
+    "value": {
+      "type": "string",
+      "pattern": "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)",
+      "options": {
+        "grid_columns": 6,
+        "infoText": "The date value."
+      }
+    }
+  }
+}
